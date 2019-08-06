@@ -1,0 +1,12 @@
+Parkia speciosa
+Parkia is a genus of flowering plants in the legume family, Fabaceae. It belongs to the subfamily Mimosoideae.
+GBIF MATCH: EXACT 98 | ACCEPTED SPECIES | Parkia speciosa | None
+
+Brotia spadicea
+Brotia is a genus of Southeast Asian freshwater snails, gastropod molluscs in the  taxonomic family Pachychilidae.The generic name Brotia is apparently in honor of a Swiss malacologist Auguste Louis Brot (1821-1896).
+GBIF MATCH: HIGHERRANK 94 | ACCEPTED GENUS | Brotia | None
+
+Forficula
+Forficula is a genus of earwigs in the family Forficulidae. The best known species is Forficula auricularia.
+GBIF MATCH: EXACT 94 | ACCEPTED GENUS | Forficula | None
+

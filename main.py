@@ -60,7 +60,7 @@ with open('input.txt', 'r') as filehandle:
 
 # Fetch and Write Output
 now = datetime.datetime.now()
-result_filename = print(now.strftime("result.%Y-%m-%d.%H:%M:%S.txt"))
+result_filename = now.strftime("result.%Y-%m-%d.%H:%M:%S.txt")
 f = open(result_filename, "a")
 print('Dancing...')
 for name in scientific_names:
