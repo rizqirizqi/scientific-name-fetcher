@@ -1,8 +1,8 @@
 # scientific-name-fetcher
 
 ## How to run
-1. Make sure you have `python3` installed in your machine.
-2. Fill the input in `input.txt`
+1. Make sure you have `python3` installed in your machine
+2. Fill the input in `input.txt`, please look at `input.txt.sample`
 3. Run with
    ```
    python3 main.py
