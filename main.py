@@ -1,11 +1,16 @@
+import os
 import requests
 import json
 import re
 import datetime
+from distutils.util import strtobool
 
-# Settings
-WITH_GBIF_SEARCH = True
-AUTO_SEARCH_PREDICTED_SPECIES = True
+from dotenv import load_dotenv
+
+# Load settings
+load_dotenv()
+WITH_GBIF_SEARCH = strtobool(os.getenv('WITH_GBIF_SEARCH'))
+AUTO_SEARCH_PREDICTED_SPECIES = strtobool(os.getenv('AUTO_SEARCH_PREDICTED_SPECIES'))
 
 # Functions
 def getDescription(query):
