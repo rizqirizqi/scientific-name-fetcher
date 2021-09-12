@@ -54,7 +54,7 @@ Current supported sources:
 
 ## License
 
-MIT
+GPL-3.0
 
 [contrib-badge]: https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat-square
 [contrib-url]: https://github.com/rizqirizqi/scientific-name-fetcher/issues
