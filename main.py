@@ -14,11 +14,17 @@ AUTO_SEARCH_PREDICTED_SPECIES = strtobool(os.getenv('AUTO_SEARCH_PREDICTED_SPECI
 
 # Functions
 def getDescription(query):
-  response = requests.get('https://en.wikipedia.org/w/api.php?action=opensearch&format=json&search={}'.format(query))
+  response = requests.get('https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exlimit=max&format=json&exsentences=2&origin=*&exintro=&explaintext=&generator=search&gsrsearch={}'.format(query))
   if response.status_code == 200:
     data = response.json()
-    if len(data[2]) > 0:
-      return data[2][0]
+    if data.get('query'):
+      pages = data['query']['pages'].values()
+      sorted_pages = sorted(list(pages), key=lambda item: item['index'])
+      extracts = ''
+      for p in sorted_pages:
+        if query.split()[0] in p['extract']:
+          extracts += p['extract'] + '\n'
+      return extracts.strip()
     else:
       return 'Not Found'
   else:
