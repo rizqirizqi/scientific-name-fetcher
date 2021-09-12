@@ -3,3 +3,4 @@ input.txt
 result*.txt
 
 .venv/
+.env
