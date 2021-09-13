@@ -65,5 +65,5 @@ GPL-3.0
 [github-watch]: https://github.com/rizqirizqi/scientific-name-fetcher/watchers
 [github-star-badge]: https://img.shields.io/github/stars/rizqirizqi/scientific-name-fetcher.svg?style=social
 [github-star]: https://github.com/rizqirizqi/scientific-name-fetcher/stargazers
-[twitter]: https://twitter.com/intent/tweet?text=Check%20out%20this%20CLI%20converter%20from%20png%2Fjpg%20images%20to%20webp!%20https%3A%2F%2Fgithub.com%2Frizqirizqi%2Fscientific-name-fetcher
+[twitter]: https://twitter.com/intent/tweet?text=Fetch%20plants%20and%20animals%20scientific%20name%20information%20from%20the%20internet!%20https%3A%2F%2Fgithub.com%2Frizqirizqi%2Fscientific-name-fetcher
 [twitter-badge]: https://img.shields.io/twitter/url/https/github.com/rizqirizqi/scientific-name-fetcher.svg?style=social
