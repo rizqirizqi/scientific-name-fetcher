@@ -7,7 +7,7 @@
 [![Star on GitHub][github-star-badge]][github-star]
 [![Tweet][twitter-badge]][twitter]
 
-Fetch plants/animals scientific name information from the internet
+Fetch plants/animals scientific name information from the internet.
 
 Current supported sources:
 - Wikipedia
