@@ -44,7 +44,6 @@ def getGBIFSearch(query):
   else:
     return 'Error'
 
-
 def getScientificName(query):
     args = {
       'q': query,
@@ -54,11 +53,9 @@ def getScientificName(query):
     if response.status_code == 200:
       data = response.json()
       for result in data['results']:
-        try:
-            name = result['species']
-            return name
-        except KeyError:
-            continue
+        species = result.get('species')
+        if species:
+          return species
     return query
 
 def getGBIFData(query):
