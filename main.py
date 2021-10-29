@@ -4,6 +4,7 @@ import requests
 import sys, getopt
 from datetime import datetime
 from distutils.util import strtobool
+import pandas as pd
 
 from dotenv import load_dotenv
 
@@ -84,8 +85,14 @@ if __name__ == '__main__':
 
   # Read Input
   scientific_names = []
-  with open(inputfile, 'r') as filehandle:
-    scientific_names = [name.rstrip() for name in filehandle.readlines()]
+  if('.txt' in inputfile):
+    with open(inputfile, 'r') as filehandle:
+      scientific_names = [name.rstrip() for name in filehandle.readlines()]
+  elif('.csv' in inputfile):
+    scientific_names = pd.read_csv(inputfile)['Names'].tolist()
+  elif('.xlsx' in inputfile):
+    scientific_names = pd.read_excel(inputfile)['Names'].tolist()
+
 
   # Fetch and Write Output
   f = open(outputfile, 'a')
