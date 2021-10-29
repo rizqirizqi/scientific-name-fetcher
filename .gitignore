@@ -1,7 +1,6 @@
 .vscode/
 input.txt
 result*.txt
-easy_test.py
 
 .venv/
 .env
