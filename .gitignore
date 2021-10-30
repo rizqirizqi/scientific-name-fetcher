@@ -1,5 +1,4 @@
 .vscode/
-input.txt
 result*.txt
 
 .venv/

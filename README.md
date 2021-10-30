@@ -24,7 +24,7 @@ Current supported sources:
    pipenv --python 3
    pipenv install
    ```
-2. Fill the input in `input.txt`, please look at `input.txt.sample`
+2. Fill your input in `input.txt`, please look at `samples/input.txt` for example. You can also use csv or xlsx if you want.
 3. Run
    ```
    pipenv run python main.py
