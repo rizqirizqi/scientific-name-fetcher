@@ -3,15 +3,13 @@ import re
 import requests
 import sys, getopt
 from datetime import datetime
-from distutils.util import strtobool
 import pandas as pd
-
 from dotenv import load_dotenv
 
 # Load settings
 load_dotenv()
-INCLUDE_GBIF_SEARCH = strtobool(os.getenv('INCLUDE_GBIF_SEARCH'))
-AUTO_SEARCH_SIMILAR_SPECIES = strtobool(os.getenv('AUTO_SEARCH_SIMILAR_SPECIES'))
+INCLUDE_GBIF_SEARCH = os.getenv('INCLUDE_GBIF_SEARCH') == 'True'
+AUTO_SEARCH_SIMILAR_SPECIES = os.getenv('AUTO_SEARCH_SIMILAR_SPECIES') == 'True'
 
 # Functions
 def getDescription(query):
@@ -107,9 +105,10 @@ if __name__ == '__main__':
   elif('.xlsx' in inputfile):
     scientific_names = pd.read_excel(inputfile)['Names'].tolist()
 
-
+  
   # Fetch and Write Output
   f = open(outputfile, 'a')
+  print('---------------------------------------------')
   print('Starting, it may take a while, please wait...')
   for name in scientific_names:
     # Non-scientific search tag enabled

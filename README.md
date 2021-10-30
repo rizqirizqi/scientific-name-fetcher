@@ -14,7 +14,7 @@ Current supported sources:
 - Global Biodiversity Information Facility (GBIF)
 
 ## Requirements
-- [python >= 3.5](https://www.python.org/downloads/)
+- [python >= 3.7](https://www.python.org/downloads/)
 - [pipenv](https://pipenv.pypa.io/en/latest/)
 
 ## How to run
@@ -27,9 +27,9 @@ Current supported sources:
 2. Fill the input in `input.txt`, please look at `input.txt.sample`
 3. Run
    ```
-   pipenv run python3 main.py
+   pipenv run python main.py
    # or
-   pipenv run python3 main.py -i path/to/input-file.txt -o path/to/output-file.txt
+   pipenv run python main.py -i path/to/input-file.txt -o path/to/output-file.txt
    ```
 4. The result will be placed in a file named `result.*.txt`
 
