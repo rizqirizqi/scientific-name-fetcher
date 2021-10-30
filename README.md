@@ -14,7 +14,7 @@ Current supported sources:
 - Global Biodiversity Information Facility (GBIF)
 
 ## Requirements
-- [python >= 3.7](https://www.python.org/downloads/)
+- [python >= 3.7](https://www.python.org/downloads/) (you can use [pyenv](https://github.com/pyenv/pyenv) for easier python version management)
 - [pipenv](https://pipenv.pypa.io/en/latest/)
 
 ## How to run
