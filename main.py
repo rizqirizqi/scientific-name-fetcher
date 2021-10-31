@@ -8,6 +8,17 @@ import pandas as pd
 
 from dotenv import load_dotenv
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 # Load settings
 load_dotenv()
 INCLUDE_GBIF_SEARCH = strtobool(os.getenv('INCLUDE_GBIF_SEARCH'))
@@ -89,52 +100,54 @@ def readArgs():
         inputfile = arg
     elif opt in ('-o', '--ofile'):
         outputfile = arg
-  print('Input file:', inputfile)
-  print('Output file:', outputfile)
+  print(bcolors.OKGREEN + 'Input file:', inputfile)
+  print('Output file:', outputfile , bcolors.ENDC)
   return inputfile, outputfile
 
 if __name__ == '__main__':
-  # Setup File
-  inputfile, outputfile = readArgs()
+  try:
+    # Setup File
+    inputfile, outputfile = readArgs()
 
-  # Read Input
-  scientific_names = []
-  if('.txt' in inputfile):
-    with open(inputfile, 'r') as filehandle:
-      scientific_names = [name.rstrip() for name in filehandle.readlines()]
-  elif('.csv' in inputfile):
-    scientific_names = pd.read_csv(inputfile)['Names'].tolist()
-  elif('.xlsx' in inputfile):
-    scientific_names = pd.read_excel(inputfile)['Names'].tolist()
+    # Read Input
+    scientific_names = []
+    if('.txt' in inputfile):
+      with open(inputfile, 'r') as filehandle:
+        scientific_names = [name.rstrip() for name in filehandle.readlines()]
+    elif('.csv' in inputfile):
+      scientific_names = pd.read_csv(inputfile)['Names'].tolist()
+    elif('.xlsx' in inputfile):
+      scientific_names = pd.read_excel(inputfile)['Names'].tolist()
 
 
-  # Fetch and Write Output
-  f = open(outputfile, 'a')
-  print('Starting, it may take a while, please wait...')
-  for name in scientific_names:
-    # Non-scientific search tag enabled
-    if name[-2:] == '-n':
-      name = getScientificName(name[:-2])
-      
-    print('Looking up:', name)
+    # Fetch and Write Output
+    f = open(outputfile, 'a')
+    print(bcolors.WARNING + '\nStarting, it may take a while, please wait...\n')
+    for name in scientific_names:
+      # Non-scientific search tag enabled
+      if name[-2:] == '-n':
+        name = getScientificName(name[:-2])
+        
+      print(bcolors.OKCYAN + 'Looking up:', name)
 
-    # Get Description
-    description = getDescription(name)
-    # Get GBIF Data from name
-    gbif_data = getGBIFData(name)
-    # Get GBIF Data from similar name
-    if gbif_data == 'Not Found' and AUTO_SEARCH_SIMILAR_SPECIES and description != 'Not Found':
-      similar_name = re.search(name.split()[0] + ' .+', description)
-      gbif_data = getGBIFData(similar_name)
-    # Get GBIF Data from first word
-    if gbif_data == 'Not Found' and name.split()[0] != name:
-      gbif_data = getGBIFData(name.split()[0])
-    f.write('### ' + name)
-    f.write('\n')
-    f.write(description or 'Not Found')
-    f.write('\n')
-    f.write(gbif_data or 'Not Found')
-    f.write('\n')
-    f.write('\n')
-  print('Done! :D')
-
+      # Get Description
+      description = getDescription(name)
+      # Get GBIF Data from name
+      gbif_data = getGBIFData(name)
+      # Get GBIF Data from similar name
+      if gbif_data == 'Not Found' and AUTO_SEARCH_SIMILAR_SPECIES and description != 'Not Found':
+        similar_name = re.search(name.split()[0] + ' .+', description)
+        gbif_data = getGBIFData(similar_name)
+      # Get GBIF Data from first word
+      if gbif_data == 'Not Found' and name.split()[0] != name:
+        gbif_data = getGBIFData(name.split()[0])
+      f.write('### ' + name)
+      f.write('\n')
+      f.write(description or 'Not Found')
+      f.write('\n')
+      f.write(gbif_data or 'Not Found')
+      f.write('\n')
+      f.write('\n')
+    print(bcolors.OKGREEN + '\nDone! :D')
+  except KeyboardInterrupt:
+    print(bcolors.FAIL + "Exiting...")
