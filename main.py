@@ -45,6 +45,20 @@ def getGBIFSearch(query):
   else:
     return 'Error'
 
+def getScientificName(query):
+    args = {
+      'q': query,
+      'language': 'en'
+    }
+    response = requests.get('http://api.gbif.org/v1/species/search', params=args)
+    if response.status_code == 200:
+      data = response.json()
+      for result in data['results']:
+        species = result.get('species')
+        if species:
+          return species
+    return query
+
 def getGBIFData(query):
   response = requests.get('http://api.gbif.org/v1/species/match?name={}'.format(query))
   if response.status_code == 200:
@@ -98,7 +112,12 @@ if __name__ == '__main__':
   f = open(outputfile, 'a')
   print('Starting, it may take a while, please wait...')
   for name in scientific_names:
+    # Non-scientific search tag enabled
+    if name[-2:] == '-n':
+      name = getScientificName(name[:-2])
+      
     print('Looking up:', name)
+
     # Get Description
     description = getDescription(name)
     # Get GBIF Data from name
@@ -118,3 +137,4 @@ if __name__ == '__main__':
     f.write('\n')
     f.write('\n')
   print('Done! :D')
+
