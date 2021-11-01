@@ -1,7 +1,8 @@
 import os
 import re
 import requests
-import sys, getopt
+import sys
+import getopt
 from datetime import datetime
 import pandas as pd
 from dotenv import load_dotenv
@@ -14,69 +15,79 @@ AUTO_SEARCH_SIMILAR_SPECIES = os.getenv('AUTO_SEARCH_SIMILAR_SPECIES') == 'True'
 USAGE_HINT = 'Usage:\npipenv run python main.py -i <inputfile> -o <outputfile> -c <column>'
 
 # Functions
+
+
 def getDescription(query):
-  response = requests.get('https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exlimit=max&format=json&exsentences=2&origin=*&exintro=&explaintext=&generator=search&gsrsearch={}'.format(query))
-  if response.status_code == 200:
-    data = response.json()
-    if data.get('query'):
-      pages = data['query']['pages'].values()
-      sorted_pages = sorted(list(pages), key=lambda item: item['index'])
-      extracts = ''
-      for p in sorted_pages:
-        if query.split()[0] in p['extract']:
-          extracts += p['extract'] + '\n'
-      return extracts.strip()
+    response = requests.get(
+        'https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exlimit=max&format=json&exsentences=2&origin=*&exintro=&explaintext=&generator=search&gsrsearch={}'.format(query))
+    if response.status_code == 200:
+        data = response.json()
+        if data.get('query'):
+            pages = data['query']['pages'].values()
+            sorted_pages = sorted(list(pages), key=lambda item: item['index'])
+            extracts = ''
+            for p in sorted_pages:
+                if query.split()[0] in p['extract']:
+                    extracts += p['extract'] + '\n'
+            return extracts.strip()
+        else:
+            return 'Not Found'
     else:
-      return 'Not Found'
-  else:
-    return 'Error'
+        return 'Error'
+
 
 def getGBIFSearch(query):
-  response = requests.get('http://api.gbif.org/v1/species/search?q={}&limit=6'.format(query))
-  if response.status_code == 200:
-    data = response.json()
-    if data and data['count'] > 0:
-      summary = 'GBIF SEARCH:\nResult: {}\n'.format(data['count'])
-      for data in data['results']:
-        summary += '{} {} | {} | {} | Taxonrank: {} > {} > {} > {} > {}\n'.format(data.get('taxonomicStatus'), data.get('rank'), data.get('canonicalName'), data.get('authorship'), data.get('kingdom'), data.get('phylum'), data.get('class'), data.get('order'), data.get('family'))
-      return summary.strip()
+    response = requests.get(
+        'http://api.gbif.org/v1/species/search?q={}&limit=6'.format(query))
+    if response.status_code == 200:
+        data = response.json()
+        if data and data['count'] > 0:
+            summary = 'GBIF SEARCH:\nResult: {}\n'.format(data['count'])
+            for data in data['results']:
+                summary += '{} {} | {} | {} | Taxonrank: {} > {} > {} > {} > {}\n'.format(data.get('taxonomicStatus'), data.get('rank'), data.get(
+                    'canonicalName'), data.get('authorship'), data.get('kingdom'), data.get('phylum'), data.get('class'), data.get('order'), data.get('family'))
+            return summary.strip()
+        else:
+            return 'Not Found'
     else:
-      return 'Not Found'
-  else:
-    return 'Error'
+        return 'Error'
+
 
 def getScientificName(query):
     args = {
-      'q': query,
-      'language': 'en'
+        'q': query,
+        'language': 'en'
     }
-    response = requests.get('http://api.gbif.org/v1/species/search', params=args)
+    response = requests.get(
+        'http://api.gbif.org/v1/species/search', params=args)
     if response.status_code == 200:
-      data = response.json()
-      for result in data['results']:
-        species = result.get('species')
-        if species:
-          return species
+        data = response.json()
+        for result in data['results']:
+            species = result.get('species')
+            if species:
+                return species
     return query
 
+
 def getGBIFData(query):
-  response = requests.get('http://api.gbif.org/v1/species/match?name={}'.format(query))
-  if response.status_code == 200:
-    data = response.json()
-    if data['matchType'] != 'NONE':
-      return 'GBIF MATCH: {} {} | {} {} | {} | {}'.format(data.get('matchType'), data.get('confidence'), data.get('status'), data.get('rank'), data.get('canonicalName'), data.get('authorship'))
-    elif INCLUDE_GBIF_SEARCH:
-      return getGBIFSearch(query)
+    response = requests.get(
+        'http://api.gbif.org/v1/species/match?name={}'.format(query))
+    if response.status_code == 200:
+        data = response.json()
+        if data['matchType'] != 'NONE':
+            return 'GBIF MATCH: {} {} | {} {} | {} | {}'.format(data.get('matchType'), data.get('confidence'), data.get('status'), data.get('rank'), data.get('canonicalName'), data.get('authorship'))
+        elif INCLUDE_GBIF_SEARCH:
+            return getGBIFSearch(query)
+        else:
+            return 'Not Found'
     else:
-      return 'Not Found'
-  else:
-    return 'Error'
+        return 'Error'
+
 
 def readArgs():
   inputfile = 'input.txt'
   outputfile = datetime.now().strftime('result.%Y-%m-%d.%H:%M:%S.txt')
   column = 'Names' # default column name to be read from csv files
-  usage_hint = 'python main.py -i <inputfile> -o <outputfile> -c <column>'
   try:
     opts, args = getopt.getopt(sys.argv[1:], 'hi:o:c:', ['ifile=','ofile=', 'column='])
   except getopt.GetoptError:
@@ -153,4 +164,3 @@ if __name__ == '__main__':
     f.write('\n')
     f.write('\n')
   print('Done! :D')
-
