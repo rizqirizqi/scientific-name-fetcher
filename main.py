@@ -45,8 +45,16 @@ def getGBIFSearch(query):
         if data and data['count'] > 0:
             summary = 'GBIF SEARCH:\nResult: {}\n'.format(data['count'])
             for data in data['results']:
-                summary += '{} {} | {} | {} | Taxonrank: {} > {} > {} > {} > {}\n'.format(data.get('taxonomicStatus'), data.get('rank'), data.get(
-                    'canonicalName'), data.get('authorship'), data.get('kingdom'), data.get('phylum'), data.get('class'), data.get('order'), data.get('family'))
+                summary += '{} {} | {} | {} | Taxonrank: {} > {} > {} > {} > {}\n'.format(
+                    data.get('taxonomicStatus'),
+                    data.get('rank'),
+                    data.get('canonicalName'),
+                    data.get('authorship'),
+                    data.get('kingdom'),
+                    data.get('phylum'),
+                    data.get('class'),
+                    data.get('order'),
+                    data.get('family'))
             return summary.strip()
         else:
             return 'Not Found'
@@ -76,7 +84,13 @@ def getGBIFData(query):
     if response.status_code == 200:
         data = response.json()
         if data['matchType'] != 'NONE':
-            return 'GBIF MATCH: {} {} | {} {} | {} | {}'.format(data.get('matchType'), data.get('confidence'), data.get('status'), data.get('rank'), data.get('canonicalName'), data.get('authorship'))
+            return 'GBIF MATCH: {} {} | {} {} | {} | {}'.format(
+                data.get('matchType'),
+                data.get('confidence'),
+                data.get('status'),
+                data.get('rank'),
+                data.get('canonicalName'),
+                data.get('authorship'))
         elif INCLUDE_GBIF_SEARCH:
             return getGBIFSearch(query)
         else:
