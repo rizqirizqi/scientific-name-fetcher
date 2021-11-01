@@ -3,15 +3,15 @@ import re
 import requests
 import sys, getopt
 from datetime import datetime
-from distutils.util import strtobool
 import pandas as pd
-
 from dotenv import load_dotenv
 
 # Load settings
 load_dotenv()
-INCLUDE_GBIF_SEARCH = strtobool(os.getenv('INCLUDE_GBIF_SEARCH'))
-AUTO_SEARCH_SIMILAR_SPECIES = strtobool(os.getenv('AUTO_SEARCH_SIMILAR_SPECIES'))
+INCLUDE_GBIF_SEARCH = os.getenv('INCLUDE_GBIF_SEARCH') == 'True'
+AUTO_SEARCH_SIMILAR_SPECIES = os.getenv('AUTO_SEARCH_SIMILAR_SPECIES') == 'True'
+
+USAGE_HINT = 'Usage:\npipenv run python main.py -i <inputfile> -o <outputfile> -c <column>'
 
 # Functions
 def getDescription(query):
@@ -76,15 +76,14 @@ def readArgs():
   inputfile = 'input.txt'
   outputfile = datetime.now().strftime('result.%Y-%m-%d.%H:%M:%S.txt')
   column = 'Names' # default column name to be read from csv files
-  usage_hint = 'python main.py -i <inputfile> -o <outputfile> -c <column>'
   try:
     opts, args = getopt.getopt(sys.argv[1:], 'hi:o:c:', ['ifile=','ofile=', 'column='])
   except getopt.GetoptError:
-    print(usage_hint)
+    print(USAGE_HINT)
     sys.exit(2)
   for opt, arg in opts:
     if opt in ('-h', '--help'):
-        print(usage_hint)
+        print(USAGE_HINT)
         sys.exit()
     elif opt in ('-i', '--ifile'):
         inputfile = arg
@@ -95,11 +94,16 @@ def readArgs():
   print('Input file:', inputfile)
   print('Output file:', outputfile)
   print('Column:', column)
+  print('---------------------------------------------')
   return inputfile, outputfile, column
 
 if __name__ == '__main__':
   # Setup File
   inputfile, outputfile, column = readArgs()
+  if not os.path.isfile(inputfile):
+    print("Input file not found, please check your command.")
+    print(USAGE_HINT)
+    sys.exit()
 
   # Read Input
   try:
@@ -115,9 +119,10 @@ if __name__ == '__main__':
     print('Error: The "{}" column does not exist on the input file'.format(column))
     print('Change the input file to contain the "{}" column'.format(column))
     print('or provide a custom column name with the "--column" arg')
+    print(USAGE_HINT)
     exit(0)
 
-
+  
   # Fetch and Write Output
   f = open(outputfile, 'a')
   print('Starting, it may take a while, please wait...')
