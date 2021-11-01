@@ -11,6 +11,8 @@ load_dotenv()
 INCLUDE_GBIF_SEARCH = os.getenv('INCLUDE_GBIF_SEARCH') == 'True'
 AUTO_SEARCH_SIMILAR_SPECIES = os.getenv('AUTO_SEARCH_SIMILAR_SPECIES') == 'True'
 
+USAGE_HINT = 'Usage:\npipenv run python main.py -i <inputfile> -o <outputfile>'
+
 # Functions
 def getDescription(query):
   response = requests.get('https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exlimit=max&format=json&exsentences=2&origin=*&exintro=&explaintext=&generator=search&gsrsearch={}'.format(query))
@@ -73,15 +75,14 @@ def getGBIFData(query):
 def readArgs():
   inputfile = 'input.txt'
   outputfile = datetime.now().strftime('result.%Y-%m-%d.%H:%M:%S.txt')
-  usage_hint = 'python main.py -i <inputfile> -o <outputfile>'
   try:
     opts, args = getopt.getopt(sys.argv[1:], 'hi:o:', ['ifile=','ofile='])
   except getopt.GetoptError:
-    print(usage_hint)
+    print(USAGE_HINT)
     sys.exit(2)
   for opt, arg in opts:
     if opt in ('-h', '--help'):
-        print(usage_hint)
+        print(USAGE_HINT)
         sys.exit()
     elif opt in ('-i', '--ifile'):
         inputfile = arg
@@ -89,11 +90,16 @@ def readArgs():
         outputfile = arg
   print('Input file:', inputfile)
   print('Output file:', outputfile)
+  print('---------------------------------------------')
   return inputfile, outputfile
 
 if __name__ == '__main__':
   # Setup File
   inputfile, outputfile = readArgs()
+  if not os.path.isfile(inputfile):
+    print("Input file not found, please check your command.")
+    print(USAGE_HINT)
+    sys.exit()
 
   # Read Input
   scientific_names = []
@@ -108,7 +114,6 @@ if __name__ == '__main__':
   
   # Fetch and Write Output
   f = open(outputfile, 'a')
-  print('---------------------------------------------')
   print('Starting, it may take a while, please wait...')
   for name in scientific_names:
     # Non-scientific search tag enabled
