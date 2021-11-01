@@ -76,6 +76,7 @@ def readArgs():
   inputfile = 'input.txt'
   outputfile = datetime.now().strftime('result.%Y-%m-%d.%H:%M:%S.txt')
   column = 'Names' # default column name to be read from csv files
+  usage_hint = 'python main.py -i <inputfile> -o <outputfile> -c <column>'
   try:
     opts, args = getopt.getopt(sys.argv[1:], 'hi:o:c:', ['ifile=','ofile=', 'column='])
   except getopt.GetoptError:
