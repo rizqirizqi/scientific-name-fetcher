@@ -5,19 +5,11 @@ import sys, getopt
 from datetime import datetime
 from distutils.util import strtobool
 import pandas as pd
+from logger import Logger 
 
 from dotenv import load_dotenv
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+logger = Logger()
 
 # Load settings
 load_dotenv()
@@ -100,8 +92,9 @@ def readArgs():
         inputfile = arg
     elif opt in ('-o', '--ofile'):
         outputfile = arg
-  print(bcolors.OKGREEN + 'Input file:', inputfile)
-  print('Output file:', outputfile , bcolors.ENDC)
+  # print(bcolors.OKGREEN + 'Input file:', inputfile)
+  logger.success(f"Input file: {inputfile}")
+  logger.success(f"Output file: {outputfile}")
   return inputfile, outputfile
 
 if __name__ == '__main__':
@@ -122,13 +115,13 @@ if __name__ == '__main__':
 
     # Fetch and Write Output
     f = open(outputfile, 'a')
-    print(bcolors.WARNING + '\nStarting, it may take a while, please wait...\n')
+    logger.warn('Starting, it may take a while, please wait...')
     for name in scientific_names:
       # Non-scientific search tag enabled
       if name[-2:] == '-n':
         name = getScientificName(name[:-2])
         
-      print(bcolors.OKCYAN + 'Looking up:', name)
+      logger.info(f"Looking up: {name}")
 
       # Get Description
       description = getDescription(name)
@@ -148,6 +141,6 @@ if __name__ == '__main__':
       f.write(gbif_data or 'Not Found')
       f.write('\n')
       f.write('\n')
-    print(bcolors.OKGREEN + '\nDone! :D')
+    logger.success("\nDone! :D")
   except KeyboardInterrupt:
-    print(bcolors.FAIL + "Exiting...")
+    logger.error("Exiting...")
