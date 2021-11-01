@@ -169,11 +169,11 @@ if __name__ == '__main__':
             gbif_data = getGBIFData(name)
             # Get GBIF Data from similar name
             if gbif_data == 'Not Found' and AUTO_SEARCH_SIMILAR_SPECIES and description != 'Not Found':
-              similar_name = re.search(name.split()[0] + ' .+', description)
-              gbif_data = getGBIFData(similar_name)
+                similar_name = re.search(name.split()[0] + ' .+', description)
+                gbif_data = getGBIFData(similar_name)
             # Get GBIF Data from first word
             if gbif_data == 'Not Found' and name.split()[0] != name:
-              gbif_data = getGBIFData(name.split()[0])
+                gbif_data = getGBIFData(name.split()[0])
             f.write('### ' + name)
             f.write('\n')
             f.write(description or 'Not Found')
