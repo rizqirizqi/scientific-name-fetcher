@@ -3,6 +3,8 @@ from unittest import TestCase, main as test_main
 from unittest.mock import patch
 import main
 from datetime import date
+from requests import Timeout
+from requests.exceptions import RequestException
 
 
 class Tests(TestCase):
@@ -11,7 +13,7 @@ class Tests(TestCase):
         testargs = ["main", "-i", "my_test_input.txt",
                     "-o", "my_test_output.txt"]
         with patch.object(sys, 'argv', testargs):
-            inputfile, outputfile = main.readArgs()
+            inputfile, outputfile, _ = main.readArgs()
             self.assertEqual(inputfile, "my_test_input.txt")
             self.assertEqual(outputfile, "my_test_output.txt")
 
@@ -22,9 +24,14 @@ class Tests(TestCase):
                 mock_datetime.now.return_value = date(2021, 10, 31)
                 mock_datetime.side_effect = lambda *args, **kw: date(
                     *args, **kw)
-                inputfile, outputfile = main.readArgs()
+                inputfile, outputfile, _ = main.readArgs()
                 self.assertEqual(inputfile, "input.txt")
                 self.assertEqual(outputfile, "result.2021-10-31.00:00:00.txt")
+
+    @patch('main.requests.get', side_effect=Timeout())
+    def test_api_timeout(self, mocked_get):
+        with self.assertRaises(RequestException):
+            main.getDescription("name")
 
 
 if __name__ == '__main__':
