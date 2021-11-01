@@ -11,7 +11,7 @@ load_dotenv()
 INCLUDE_GBIF_SEARCH = os.getenv('INCLUDE_GBIF_SEARCH') == 'True'
 AUTO_SEARCH_SIMILAR_SPECIES = os.getenv('AUTO_SEARCH_SIMILAR_SPECIES') == 'True'
 
-USAGE_HINT = 'Usage:\npipenv run python main.py -i <inputfile> -o <outputfile>'
+USAGE_HINT = 'Usage:\npipenv run python main.py -i <inputfile> -o <outputfile> -c <column>'
 
 # Functions
 def getDescription(query):
@@ -75,8 +75,9 @@ def getGBIFData(query):
 def readArgs():
   inputfile = 'input.txt'
   outputfile = datetime.now().strftime('result.%Y-%m-%d.%H:%M:%S.txt')
+  column = 'Names' # default column name to be read from csv files
   try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hi:o:', ['ifile=','ofile='])
+    opts, args = getopt.getopt(sys.argv[1:], 'hi:o:c:', ['ifile=','ofile=', 'column='])
   except getopt.GetoptError:
     print(USAGE_HINT)
     sys.exit(2)
@@ -88,28 +89,38 @@ def readArgs():
         inputfile = arg
     elif opt in ('-o', '--ofile'):
         outputfile = arg
+    elif opt in ('-c', '--column'):
+        column = arg
   print('Input file:', inputfile)
   print('Output file:', outputfile)
+  print('Column:', column)
   print('---------------------------------------------')
-  return inputfile, outputfile
+  return inputfile, outputfile, column
 
 if __name__ == '__main__':
   # Setup File
-  inputfile, outputfile = readArgs()
+  inputfile, outputfile, column = readArgs()
   if not os.path.isfile(inputfile):
     print("Input file not found, please check your command.")
     print(USAGE_HINT)
     sys.exit()
 
   # Read Input
-  scientific_names = []
-  if('.txt' in inputfile):
-    with open(inputfile, 'r') as filehandle:
-      scientific_names = [name.rstrip() for name in filehandle.readlines()]
-  elif('.csv' in inputfile):
-    scientific_names = pd.read_csv(inputfile)['Names'].tolist()
-  elif('.xlsx' in inputfile):
-    scientific_names = pd.read_excel(inputfile)['Names'].tolist()
+  try:
+    scientific_names = []
+    if('.txt' in inputfile):
+      with open(inputfile, 'r') as filehandle:
+        scientific_names = [name.rstrip() for name in filehandle.readlines()]
+    elif('.csv' in inputfile):
+      scientific_names = pd.read_csv(inputfile)[column].tolist()
+    elif('.xlsx' in inputfile):
+      scientific_names = pd.read_excel(inputfile)[column].tolist()
+  except KeyError:
+    print('Error: The "{}" column does not exist on the input file'.format(column))
+    print('Change the input file to contain the "{}" column'.format(column))
+    print('or provide a custom column name with the "--column" arg')
+    print(USAGE_HINT)
+    exit(0)
 
   
   # Fetch and Write Output
