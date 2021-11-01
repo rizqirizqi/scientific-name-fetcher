@@ -183,4 +183,4 @@ if __name__ == '__main__':
             f.write('\n')
         print('Done! :D')
     except requests.exceptions.RequestException:
-        print("There was problem connecting to the APIs, check your internet connection and ttry again")
+        print("There was problem connecting to the APIs, check your internet connection and try again")
