@@ -155,29 +155,32 @@ if __name__ == '__main__':
     # Fetch and Write Output
     f = open(outputfile, 'a')
     print('Starting, it may take a while, please wait...')
-    for name in scientific_names:
-        # Non-scientific search tag enabled
-        if name[-2:] == '-n':
-            name = getScientificName(name[:-2])
+    try:
+        for name in scientific_names:
+            # Non-scientific search tag enabled
+            if name[-2:] == '-n':
+                name = getScientificName(name[:-2])
 
-        print('Looking up:', name)
+            print('Looking up:', name)
 
-        # Get Description
-        description = getDescription(name)
-        # Get GBIF Data from name
-        gbif_data = getGBIFData(name)
-        # Get GBIF Data from similar name
-        if gbif_data == 'Not Found' and AUTO_SEARCH_SIMILAR_SPECIES and description != 'Not Found':
-            similar_name = re.search(name.split()[0] + ' .+', description)
-            gbif_data = getGBIFData(similar_name)
-        # Get GBIF Data from first word
-        if gbif_data == 'Not Found' and name.split()[0] != name:
-            gbif_data = getGBIFData(name.split()[0])
-        f.write('### ' + name)
-        f.write('\n')
-        f.write(description or 'Not Found')
-        f.write('\n')
-        f.write(gbif_data or 'Not Found')
-        f.write('\n')
-        f.write('\n')
-    print('Done! :D')
+            # Get Description
+            description = getDescription(name)
+            # Get GBIF Data from name
+            gbif_data = getGBIFData(name)
+            # Get GBIF Data from similar name
+            if gbif_data == 'Not Found' and AUTO_SEARCH_SIMILAR_SPECIES and description != 'Not Found':
+                similar_name = re.search(name.split()[0] + ' .+', description)
+                gbif_data = getGBIFData(similar_name)
+            # Get GBIF Data from first word
+            if gbif_data == 'Not Found' and name.split()[0] != name:
+                gbif_data = getGBIFData(name.split()[0])
+            f.write('### ' + name)
+            f.write('\n')
+            f.write(description or 'Not Found')
+            f.write('\n')
+            f.write(gbif_data or 'Not Found')
+            f.write('\n')
+            f.write('\n')
+        print('Done! :D')
+    except requests.exceptions.RequestException:
+        print("There was problem connecting to the APIs, check your internet connection and try again")
