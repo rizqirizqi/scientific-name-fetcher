@@ -16,7 +16,19 @@ AUTO_SEARCH_SIMILAR_SPECIES = os.getenv(
 USAGE_HINT = 'Usage:\npipenv run python main.py -i <inputfile> -o <outputfile> -c <column>'
 
 # Functions
+def list_get(l, idx, default = None):
+  try:
+    return l[idx]
+  except IndexError:
+    return default
 
+def getRecommendedKeyword(query):
+    response = requests.get('https://commons.wikimedia.org/w/api.php?action=opensearch&search={}'.format(query))
+    data = response.json()
+    if list_get(data[1], 0):
+        return list_get(data[1], 0)
+    else:
+        return 'Not Found'
 
 def getDescription(query):
     response = requests.get(
@@ -45,7 +57,7 @@ def getGBIFSearch(query):
         if data and data['count'] > 0:
             summary = 'GBIF SEARCH:\nResult: {}\n'.format(data['count'])
             for data in data['results']:
-                summary += '{} {} | {} | {} | Taxonrank: {} > {} > {} > {} > {}\n'.format(
+                summary += '{} {} | {} | {} | Taxonrank: {} > {} > {} > {} > {} > {} > {}\n'.format(
                     data.get('taxonomicStatus'),
                     data.get('rank'),
                     data.get('canonicalName'),
@@ -54,7 +66,9 @@ def getGBIFSearch(query):
                     data.get('phylum'),
                     data.get('class'),
                     data.get('order'),
-                    data.get('family'))
+                    data.get('family'),
+                    data.get('genus'),
+                    data.get('species'))
             return summary.strip()
         else:
             return 'Not Found'
@@ -84,20 +98,23 @@ def getGBIFData(query):
     if response.status_code == 200:
         data = response.json()
         if data['matchType'] != 'NONE':
-            return 'GBIF MATCH: {} {} | {} {} | {} | {}\nTaxonrank: {} > {} > {} > {} > {} > {} > {}'.format(
-                data.get('matchType'),
-                data.get('confidence'),
-                data.get('status'),
-                data.get('rank'),
-                data.get('canonicalName'),
-                data.get('authorship'),
-                data.get('kingdom'),
-                data.get('phylum'),
-                data.get('class'),
-                data.get('order'),
-                data.get('family'),
-                data.get('genus'),
-                data.get('species'))
+            if data.get('rank') != 'SPECIES':
+                return getGBIFSearch(query)
+            else:
+                return 'GBIF MATCH: {} {} | {} {} | {} | {}\nTaxonrank: {} > {} > {} > {} > {} > {} > {}'.format(
+                    data.get('matchType'),
+                    data.get('confidence'),
+                    data.get('status'),
+                    data.get('rank'),
+                    data.get('canonicalName'),
+                    data.get('authorship'),
+                    data.get('kingdom'),
+                    data.get('phylum'),
+                    data.get('class'),
+                    data.get('order'),
+                    data.get('family'),
+                    data.get('genus'),
+                    data.get('species'))
         elif INCLUDE_GBIF_SEARCH:
             return getGBIFSearch(query)
         else:
@@ -172,12 +189,18 @@ if __name__ == '__main__':
 
             # Get Description
             description = getDescription(name)
+            # Get Recommended Keyword
+            if description == 'Not Found':
+                reco_keyword = getRecommendedKeyword(name)
+                if reco_keyword:
+                    description = 'Do you mean: {}'.format(reco_keyword)
             # Get GBIF Data from name
             gbif_data = getGBIFData(name)
             # Get GBIF Data from similar name
             if gbif_data == 'Not Found' and AUTO_SEARCH_SIMILAR_SPECIES and description != 'Not Found':
-                similar_name = re.search(name.split()[0] + ' .+', description)
-                gbif_data = getGBIFData(similar_name)
+                similar_name = list_get(re.findall(name.split()[0] + ' [a-z]+', description), 0)
+                if similar_name:
+                    gbif_data = getGBIFData(similar_name)
             # Get GBIF Data from first word
             if gbif_data == 'Not Found' and name.split()[0] != name:
                 gbif_data = getGBIFData(name.split()[0])
