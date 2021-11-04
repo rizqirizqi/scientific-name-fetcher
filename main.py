@@ -84,13 +84,20 @@ def getGBIFData(query):
     if response.status_code == 200:
         data = response.json()
         if data['matchType'] != 'NONE':
-            return 'GBIF MATCH: {} {} | {} {} | {} | {}'.format(
+            return 'GBIF MATCH: {} {} | {} {} | {} | {}\nTaxonrank: {} > {} > {} > {} > {} > {} > {}'.format(
                 data.get('matchType'),
                 data.get('confidence'),
                 data.get('status'),
                 data.get('rank'),
                 data.get('canonicalName'),
-                data.get('authorship'))
+                data.get('authorship'),
+                data.get('kingdom'),
+                data.get('phylum'),
+                data.get('class'),
+                data.get('order'),
+                data.get('family'),
+                data.get('genus'),
+                data.get('species'))
         elif INCLUDE_GBIF_SEARCH:
             return getGBIFSearch(query)
         else:
@@ -101,7 +108,7 @@ def getGBIFData(query):
 
 def readArgs():
     inputfile = 'input.txt'
-    outputfile = datetime.now().strftime('result.%Y-%m-%d.%H:%M:%S.txt')
+    outputfile = datetime.now().strftime('result.%Y-%m-%d.%H%M%S.txt')
     column = 'Names'  # default column name to be read from csv files
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hi:o:c:', [
@@ -153,7 +160,7 @@ if __name__ == '__main__':
         exit(0)
 
     # Fetch and Write Output
-    f = open(outputfile, 'a')
+    f = open(outputfile, 'a', encoding='utf8')
     print('Starting, it may take a while, please wait...')
     try:
         for name in scientific_names:
