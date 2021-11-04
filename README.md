@@ -48,6 +48,7 @@ Current supported sources:
    cd scientific-name-fetcher
    ```
 2. Copy env
+ 
    Linux:
    ```sh
    cp env.sample .env
