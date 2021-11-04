@@ -47,17 +47,26 @@ Current supported sources:
    git clone git@github.com:rizqirizqi/scientific-name-fetcher.git
    cd scientific-name-fetcher
    ```
-2. Install dependencies
+2. Copy env
+   Linux:
+   ```sh
+   cp env.sample .env
+   ```
+   Windows:
+   ```sh
+   copy env.sample .env
+   ```
+3. Install dependencies
    ```sh
    pipenv --python 3
    pipenv install
    ```
-3. Fill your input in `input.txt`, please look at `samples/input.txt` for example. You can also use csv or xlsx if you want.
-4. Run
+4. Fill your input in `input.txt`, please look at `samples/input.txt` for example. You can also use csv or xlsx if you want.
+5. Run
    ```sh
    pipenv run python main.py -i input.txt
    ```
-5. The result will be placed in a file named `result.*.txt`
+6. The result will be placed in a file named `result.*.txt`
 
 ### Help
 ```sh
