@@ -10,3 +10,4 @@ python-dotenv = "*"
 requests = "*"
 pandas = "*"
 openpyxl = "*"
+thefuzz = {extras = ["speedup"], version = "*"}
