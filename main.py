@@ -218,7 +218,7 @@ if __name__ == '__main__':
             # Get Recommended Keyword
             if description == 'Not Found':
                 reco_keyword = getRecommendedKeyword(name)
-                if reco_keyword:
+                if reco_keyword != 'Not Found':
                     description = 'Do you mean: {}'.format(reco_keyword)
             # Get GBIF Data from name
             gbif_data = getGBIFMatch(name)
