@@ -8,6 +8,7 @@ import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
 from helpers.string import fuzzy_search
+from helpers.list import list_get
 
 # Load settings
 load_dotenv()
@@ -21,12 +22,6 @@ log.basicConfig(format='%(message)s', level=log.INFO)
 
 
 # Functions
-def list_get(l, idx, default = None):
-  try:
-    return l[idx]
-  except IndexError:
-    return default
-
 def getRecommendedKeyword(query):
     log.debug(f'getRecommendedKeyword: {query}...')
     response = requests.get('https://commons.wikimedia.org/w/api.php?action=opensearch&search={}'.format(query))
