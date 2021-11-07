@@ -49,6 +49,8 @@ def getDescription(query):
             sorted_pages = sorted(list(pages), key=lambda item: item['index'])
             extracts = ''
             for p in sorted_pages:
+                if any(s in p['title'].lower() for s in ['index of', 'list of']):
+                    continue
                 if fuzzy_search(p['extract'], query):
                     extracts += p['extract'] + '\n'
             log.debug('found!')
