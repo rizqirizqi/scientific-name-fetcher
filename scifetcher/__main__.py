@@ -7,142 +7,18 @@ import logging as log
 import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
-from scifetcher.helpers.string import fuzzy_search
+from scifetcher.apiclients.gbif_api import GbifApi
+from scifetcher.apiclients.wiki_api import WikiApi
 from scifetcher.helpers.list import list_get
 
 # Load settings
 load_dotenv()
-INCLUDE_GBIF_SEARCH = os.getenv('INCLUDE_GBIF_SEARCH') == 'True'
 AUTO_SEARCH_SIMILAR_SPECIES = os.getenv(
     'AUTO_SEARCH_SIMILAR_SPECIES') == 'True'
 
 USAGE_HINT = 'Usage:\npipenv run python -m scifetcher -i <inputfile> -o <outputfile> -c <column> -v'
 
 log.basicConfig(format='%(message)s', level=log.INFO)
-
-
-# Functions
-def getRecommendedKeyword(query):
-    log.debug(f'getRecommendedKeyword: {query}...')
-    response = requests.get('https://commons.wikimedia.org/w/api.php?action=opensearch&search={}'.format(query))
-    data = response.json()
-    if list_get(data[1], 0):
-        log.debug('found!')
-        return list_get(data[1], 0)
-    else:
-        log.debug('notfound!')
-        return 'Not Found'
-
-def getDescription(query):
-    log.debug(f'getDescription: {query}...')
-    response = requests.get(
-        'https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exlimit=max&format=json&exsentences=2&origin=*&exintro=&explaintext=&generator=search&gsrsearch={}'.format(query))
-    if response.status_code == 200:
-        data = response.json()
-        if data.get('query'):
-            pages = data['query']['pages'].values()
-            sorted_pages = sorted(list(pages), key=lambda item: item['index'])
-            extracts = ''
-            for p in sorted_pages:
-                if any(s in p['title'].lower() for s in ['index of', 'list of']):
-                    continue
-                if fuzzy_search(p['extract'], query):
-                    extracts += p['extract'] + '\n'
-            log.debug('found!')
-            return extracts.strip()
-        else:
-            log.debug('notfound!')
-            return 'Not Found'
-    else:
-        log.debug('error!')
-        return 'Error'
-
-
-def getGBIFSearch(query):
-    log.debug(f'getGBIFSearch: {query}...')
-    response = requests.get(
-        'http://api.gbif.org/v1/species/search?q={}&limit=6'.format(query))
-    if response.status_code == 200:
-        data = response.json()
-        if data and data['count'] > 0:
-            summary = 'GBIF SEARCH:\nResult: {}\n'.format(data['count'])
-            for data in data['results']:
-                summary += '{} {} | {} | {} | Taxonrank: {} > {} > {} > {} > {} > {} > {}\n'.format(
-                    data.get('taxonomicStatus'),
-                    data.get('rank'),
-                    data.get('canonicalName'),
-                    data.get('authorship'),
-                    data.get('kingdom'),
-                    data.get('phylum'),
-                    data.get('class'),
-                    data.get('order'),
-                    data.get('family'),
-                    data.get('genus'),
-                    data.get('species'))
-            log.debug('found!')
-            return summary.strip()
-        else:
-            log.debug('notfound!')
-            return 'Not Found'
-    else:
-        log.debug('error!')
-        return 'Error'
-
-
-def getScientificName(query):
-    log.debug(f'getScientificName: {query}...')
-    args = {
-        'q': query,
-        'language': 'en'
-    }
-    response = requests.get(
-        'http://api.gbif.org/v1/species/search', params=args)
-    if response.status_code == 200:
-        data = response.json()
-        for result in data['results']:
-            species = result.get('species')
-            if species:
-                log.debug('found!')
-                return species
-    log.debug('notfound!')
-    return query
-
-
-def getGBIFMatch(query):
-    log.debug(f'getGBIFMatch: {query}...')
-    response = requests.get(
-        'http://api.gbif.org/v1/species/match?name={}'.format(query))
-    if response.status_code == 200:
-        data = response.json()
-        if data['matchType'] != 'NONE':
-            if data.get('rank') != 'SPECIES':
-                log.debug('notfound!')
-                return getGBIFSearch(query)
-            else:
-                log.debug('found!')
-                return 'GBIF MATCH: {} {} | {} {} | {} | {}\nTaxonrank: {} > {} > {} > {} > {} > {} > {}'.format(
-                    data.get('matchType'),
-                    data.get('confidence'),
-                    data.get('status'),
-                    data.get('rank'),
-                    data.get('canonicalName'),
-                    data.get('authorship'),
-                    data.get('kingdom'),
-                    data.get('phylum'),
-                    data.get('class'),
-                    data.get('order'),
-                    data.get('family'),
-                    data.get('genus'),
-                    data.get('species'))
-        elif INCLUDE_GBIF_SEARCH:
-            return getGBIFSearch(query)
-        else:
-            log.debug('notfound!')
-            return 'Not Found'
-    else:
-        log.debug('error!')
-        return 'Error'
-
 
 def readArgs():
     inputfile = 'input.txt'
@@ -208,25 +84,26 @@ if __name__ == '__main__':
             
             # Non-scientific search tag enabled
             if name[-2:] == '-n':
-                name = getScientificName(name[:-2])
-
+                name = GbifApi(name[:-2]).get_scientific_name()
+            
             # Get Description
-            description = getDescription(name)
+            wiki_result = WikiApi(name)
+            description = wiki_result.get_description()
             # Get Recommended Keyword
             if description == 'Not Found':
-                reco_keyword = getRecommendedKeyword(name)
+                reco_keyword = wiki_result.get_recommended_keyword()
                 if reco_keyword != 'Not Found':
                     description = 'Do you mean: {}'.format(reco_keyword)
             # Get GBIF Data from name
-            gbif_data = getGBIFMatch(name)
+            gbif_data =GbifApi(name).get_gbif_match()
             # Get GBIF Data from similar name
             if gbif_data == 'Not Found' and AUTO_SEARCH_SIMILAR_SPECIES and description != 'Not Found':
                 similar_name = list_get(re.findall(name.split()[0] + ' [a-z]+', description), 0)
                 if similar_name:
-                    gbif_data = getGBIFMatch(similar_name)
+                    gbif_data = GbifApi(similar_name).get_gbif_match()
             # Get GBIF Data from first word
             if gbif_data == 'Not Found' and name.split()[0] != name:
-                gbif_data = getGBIFMatch(name.split()[0])
+                gbif_data = GbifApi(name.split()[0]).get_gbif_match()
             f.write('### ' + name)
             f.write('\n')
             f.write(description or 'Not Found')

@@ -93,6 +93,24 @@ pipenv run python -m scifetcher --help
 4. Tag [@rizqirizqi](https://github.com/rizqirizqi) for review
 5. Merge~~
 
+### Run Test
+```
+# all
+pipenv run python -m unittest
+# one file
+pipenv run python -m unittest tests
+# coverage
+pipenv run coverage run -m unittest
+coverage report
+coverage html && xdg-open ./htmlcov/index.html
+```
+
+### Lint
+1. In VSCode, Open the Command Palette (in the View menu)
+2. Type `Python: Select Interpreter`
+3. Select `moneto_bot`
+4. Choose `pipenv`
+
 ## License
 
 GPL-3.0
