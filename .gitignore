@@ -1,6 +1,8 @@
 .vscode/
 __pycache__/
 result*.txt
+input.txt
+output.txt
 
 .venv/
 .env

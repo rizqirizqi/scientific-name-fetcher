@@ -7,8 +7,8 @@ import logging as log
 import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
-from helpers.string import fuzzy_search
-from helpers.list import list_get
+from scifetcher.helpers.string import fuzzy_search
+from scifetcher.helpers.list import list_get
 
 # Load settings
 load_dotenv()
@@ -16,7 +16,7 @@ INCLUDE_GBIF_SEARCH = os.getenv('INCLUDE_GBIF_SEARCH') == 'True'
 AUTO_SEARCH_SIMILAR_SPECIES = os.getenv(
     'AUTO_SEARCH_SIMILAR_SPECIES') == 'True'
 
-USAGE_HINT = 'Usage:\npipenv run python main.py -i <inputfile> -o <outputfile> -c <column> -v'
+USAGE_HINT = 'Usage:\npipenv run python -m scifetcher -i <inputfile> -o <outputfile> -c <column> -v'
 
 log.basicConfig(format='%(message)s', level=log.INFO)
 

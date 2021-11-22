@@ -1,4 +1,4 @@
-# scientific-name-fetcher
+# scientific-name-fetcher (scifetcher)
 
 [![contributions welcome][contrib-badge]][contrib-url]
 [![MIT License][license-badge]][license-url]
@@ -65,13 +65,13 @@ Current supported sources:
 4. Fill your input in `input.txt`, please look at `samples/input.txt` for example. You can also use csv or xlsx if you want.
 5. Run
    ```sh
-   pipenv run python main.py -i input.txt
+   pipenv run python -m scifetcher -i input.txt
    ```
 6. The result will be placed in a file named `result.*.txt`
 
 ### Help
 ```sh
-pipenv run python main.py --help
+pipenv run python -m scifetcher --help
 ```
 
 ## Settings
