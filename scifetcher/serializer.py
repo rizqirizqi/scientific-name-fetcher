@@ -20,12 +20,13 @@ def serialize_txt(outputfile, search_result_list):
         for species in search_result.species_list:
             if species.match_type.lower() == "exact":
                 f.write(
-                    "{} MATCH: {} {} | {} {} | {} | {}\nTaxonrank: {}".format(
+                    "{} MATCH: {} {} | {} {} | {} | {} | {}\nTaxonrank: {}".format(
                         species.source,
                         species.match_type,
                         species.match_confidence,
                         species.taxonomic_status,
                         species.rank,
+                        species.accepted_name,
                         species.canonical_name,
                         species.authorship,
                         species.get_taxonrank(),
@@ -33,10 +34,11 @@ def serialize_txt(outputfile, search_result_list):
                 )
             else:
                 f.write(
-                    "{} SEARCH: {} {} | {} | {} | Taxonrank: {}".format(
+                    "{} SEARCH: {} {} | {} | {} | {} | Taxonrank: {}".format(
                         species.source,
                         species.taxonomic_status,
                         species.rank,
+                        species.accepted_name,
                         species.canonical_name,
                         species.authorship,
                         species.get_taxonrank(),
@@ -60,7 +62,10 @@ def generate_dataframe(search_result_list):
     frames = []
     for search_result in search_result_list:
         spec_list = DataFrame.from_records(
-            [s.to_dict() for s in search_result.species_list]
+            [
+                {**{"Verbatim": search_result.query}, **s.to_dict()}
+                for s in search_result.species_list
+            ]
         )
         frames.append(spec_list)
     return concat(frames)
