@@ -2,8 +2,12 @@ class Species:
     def __init__(
         self,
         source="",
+        id="",
+        url="",
+        search_url="",
         taxonomic_status="",
         rank="",
+        accepted_name="",
         scientific_name="",
         canonical_name="",
         authorship="",
@@ -18,8 +22,12 @@ class Species:
         match_confidence=0,
     ) -> None:
         self.source = source
+        self.id = id
+        self.url = url
+        self.search_url = search_url
         self.taxonomic_status = taxonomic_status
         self.rank = rank
+        self.accepted_name = accepted_name
         self.scientific_name = scientific_name
         self.canonical_name = canonical_name
         self.authorship = authorship
@@ -39,8 +47,10 @@ class Species:
     def to_dict(self):
         return {
             "Source": self.source,
+            "Source Key": self.id,
             "Status": self.taxonomic_status,
             "Rank": self.rank,
+            "Accepted Name": self.accepted_name,
             "Scientific Name": self.scientific_name,
             "Canonical Name": self.canonical_name,
             "Authorship": self.authorship,
@@ -53,4 +63,6 @@ class Species:
             "Species": self.taxon_species,
             "MatchType": self.match_type,
             "Confidence": self.match_confidence,
+            "URL": self.url,
+            "Search URL": self.search_url,
         }
