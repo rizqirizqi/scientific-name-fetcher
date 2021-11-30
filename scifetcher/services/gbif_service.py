@@ -13,7 +13,6 @@ AUTO_SEARCH_SIMILAR_SPECIES = os.getenv("AUTO_SEARCH_SIMILAR_SPECIES") == "True"
 class GbifService(BaseService):
     def fetch_data(self, query, description):
         self.query = query
-        self.description = description
         species_list = []
         try:
             # Get GBIF Data from name
@@ -48,6 +47,7 @@ class GbifService(BaseService):
                         "GBIF",
                         taxonomic_status=data.get("taxonomicStatus"),
                         rank=data.get("rank"),
+                        scientific_name=data.get("scientificName"),
                         canonical_name=data.get("canonicalName"),
                         authorship=data.get("authorship"),
                         taxon_kingdom=data.get("kingdom"),
@@ -57,7 +57,6 @@ class GbifService(BaseService):
                         taxon_family=data.get("family"),
                         taxon_genus=data.get("genus"),
                         taxon_species=data.get("species"),
-                        description=self.description,
                     )
                 )
             log.debug("found!")
@@ -80,6 +79,7 @@ class GbifService(BaseService):
                         "GBIF",
                         taxonomic_status=data.get("status"),
                         rank=data.get("rank"),
+                        scientific_name=data.get("scientificName"),
                         canonical_name=data.get("canonicalName"),
                         authorship=data.get("authorship"),
                         taxon_kingdom=data.get("kingdom"),
@@ -91,7 +91,6 @@ class GbifService(BaseService):
                         taxon_species=data.get("species"),
                         match_type=data.get("matchType"),
                         match_confidence=data.get("confidence"),
-                        description=self.description,
                     )
                 ]
         elif INCLUDE_GBIF_SEARCH:

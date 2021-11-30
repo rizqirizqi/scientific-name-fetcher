@@ -3,10 +3,11 @@ import requests
 import sys
 import getopt
 import logging as log
-import pandas as pd
 from datetime import datetime
+from pandas import read_csv, read_excel
 from dotenv import load_dotenv
 from scifetcher.models.search_result import SearchResult
+from scifetcher.serializer import serialize
 from scifetcher.services.gbif_service import GbifService
 from scifetcher.services.wiki_service import WikiService
 from scifetcher.models.species import Species
@@ -64,9 +65,9 @@ if __name__ == "__main__":
             with open(inputfile, "r") as filehandle:
                 scientific_names = [name.rstrip() for name in filehandle.readlines()]
         elif ".csv" in inputfile:
-            scientific_names = pd.read_csv(inputfile)[column].tolist()
+            scientific_names = read_csv(inputfile)[column].tolist()
         elif ".xlsx" in inputfile:
-            scientific_names = pd.read_excel(inputfile)[column].tolist()
+            scientific_names = read_excel(inputfile)[column].tolist()
     except KeyError:
         log.error(f'Error: The "{column}" column does not exist on the input file')
         log.error(f'Change the input file to contain the "{column}" column')
@@ -100,51 +101,7 @@ if __name__ == "__main__":
             search_result_list.append(search_result)
 
         # Write Output
-        f = open(outputfile, "a", encoding="utf8")
-        for search_result in search_result_list:
-            f.write("### " + search_result.query)
-            f.write("\n")
-            f.write(search_result.description or "Not Found")
-            f.write("\n")
-            for species in search_result.species_list:
-                if species.match_type.lower() == "exact":
-                    f.write(
-                        "{} MATCH: {} {} | {} {} | {} | {}\nTaxonrank: {} > {} > {} > {} > {} > {} > {}".format(
-                            species.source,
-                            species.match_type,
-                            species.match_confidence,
-                            species.taxonomic_status,
-                            species.rank,
-                            species.canonical_name,
-                            species.authorship,
-                            species.taxon_kingdom,
-                            species.taxon_phylum,
-                            species.taxon_class,
-                            species.taxon_order,
-                            species.taxon_family,
-                            species.taxon_genus,
-                            species.taxon_species,
-                        )
-                    )
-                else:
-                    f.write(
-                        "{} SEARCH: {} {} | {} | {} | Taxonrank: {} > {} > {} > {} > {} > {} > {}".format(
-                            species.source,
-                            species.taxonomic_status,
-                            species.rank,
-                            species.canonical_name,
-                            species.authorship,
-                            species.taxon_kingdom,
-                            species.taxon_phylum,
-                            species.taxon_class,
-                            species.taxon_order,
-                            species.taxon_family,
-                            species.taxon_genus,
-                            species.taxon_species,
-                        )
-                    )
-                f.write("\n")
-            f.write("\n")
+        serialize(outputfile, search_result_list)
 
         log.info("Done! :D")
     except requests.exceptions.RequestException:
