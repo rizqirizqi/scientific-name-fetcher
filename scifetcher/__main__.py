@@ -20,7 +20,7 @@ USAGE_HINT = "Usage:\npipenv run python -m scifetcher -i <inputfile> -o <outputf
 log.basicConfig(format="%(message)s", level=log.INFO)
 
 
-def readArgs():
+def read_args():
     inputfile = "input.txt"
     outputfile = datetime.now().strftime("result.%Y-%m-%d.%H%M%S.txt")
     column = "Names"  # default column name to be read from csv files
@@ -34,7 +34,7 @@ def readArgs():
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             log.info(USAGE_HINT)
-            sys.exit()
+            sys.exit(2)
         elif opt in ("-i", "--ifile"):
             inputfile = arg
         elif opt in ("-o", "--ofile"):
@@ -50,15 +50,7 @@ def readArgs():
     return inputfile, outputfile, column
 
 
-if __name__ == "__main__":
-    # Setup File
-    inputfile, outputfile, column = readArgs()
-    if not os.path.isfile(inputfile):
-        log.error("Input file not found, please check your command.")
-        log.info(USAGE_HINT)
-        sys.exit()
-
-    # Read Input
+def read_input(inputfile):
     try:
         scientific_names = []
         if ".txt" in inputfile:
@@ -68,12 +60,25 @@ if __name__ == "__main__":
             scientific_names = read_csv(inputfile)[column].tolist()
         elif ".xlsx" in inputfile:
             scientific_names = read_excel(inputfile)[column].tolist()
+        return scientific_names
     except KeyError:
         log.error(f'Error: The "{column}" column does not exist on the input file')
         log.error(f'Change the input file to contain the "{column}" column')
         log.error('or provide a custom column name with the "--column" arg')
         log.info(USAGE_HINT)
-        exit(0)
+        sys.exit(2)
+
+
+if __name__ == "__main__":
+    # Setup File
+    inputfile, outputfile, column = read_args()
+    if not os.path.isfile(inputfile):
+        log.error("Input file not found, please check your command.")
+        log.info(USAGE_HINT)
+        sys.exit(2)
+
+    # Read Input
+    scientific_names = read_input(inputfile)
 
     # Fetch and Write Output
     log.info("Starting, it may take a while, please wait...")
@@ -104,9 +109,7 @@ if __name__ == "__main__":
         serialize(outputfile, search_result_list)
 
         log.info("Done! :D")
-    except requests.exceptions.RequestException:
-        log.error(
-            "There was problem connecting to the APIs, check your internet connection and try again"
-        )
     except Exception as e:
-        log.exception("Exception occurred")
+        log.exception(
+            "Error occurred. Please try again. Contact the maintainer if the problem persist."
+        )
