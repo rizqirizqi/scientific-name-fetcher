@@ -2,6 +2,8 @@ __pycache__/
 result*.txt
 input.txt
 output.txt
+output.csv
+output.xlsx
 
 .venv/
 .env
