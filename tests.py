@@ -4,7 +4,7 @@ from unittest.mock import patch
 from datetime import date
 from requests import Timeout
 from requests.exceptions import RequestException
-from scifetcher.apiclients.wiki_api import WikiApi
+from scifetcher.services.wiki_service import WikiService
 from scifetcher import __main__
 
 
@@ -26,10 +26,10 @@ class Tests(TestCase):
                 self.assertEqual(inputfile, "input.txt")
                 self.assertEqual(outputfile, "result.2021-10-31.000000.txt")
 
-    @patch("scifetcher.apiclients.wiki_api.requests.get", side_effect=Timeout())
+    @patch("scifetcher.services.wiki_service.requests.get", side_effect=Timeout())
     def test_api_timeout(self, mocked_get):
-        with self.assertRaises(RequestException):
-            WikiApi("name").get_description()
+        description = WikiService().fetch_data("name")
+        self.assertEqual(description, "Error")
 
 
 if __name__ == "__main__":

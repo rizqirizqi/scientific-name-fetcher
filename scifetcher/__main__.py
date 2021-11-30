@@ -1,5 +1,4 @@
 import os
-import re
 import requests
 import sys
 import getopt
@@ -7,13 +6,13 @@ import logging as log
 import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
-from scifetcher.apiclients.gbif_api import GbifApi
-from scifetcher.apiclients.wiki_api import WikiApi
-from scifetcher.helpers.list import list_get
+from scifetcher.models.search_result import SearchResult
+from scifetcher.services.gbif_service import GbifService
+from scifetcher.services.wiki_service import WikiService
+from scifetcher.models.species import Species
 
 # Load settings
 load_dotenv()
-AUTO_SEARCH_SIMILAR_SPECIES = os.getenv("AUTO_SEARCH_SIMILAR_SPECIES") == "True"
 
 USAGE_HINT = "Usage:\npipenv run python -m scifetcher -i <inputfile> -o <outputfile> -c <column> -v"
 
@@ -69,56 +68,84 @@ if __name__ == "__main__":
         elif ".xlsx" in inputfile:
             scientific_names = pd.read_excel(inputfile)[column].tolist()
     except KeyError:
-        log.error(
-            'Error: The "{}" column does not exist on the input file'.format(column)
-        )
-        log.error('Change the input file to contain the "{}" column'.format(column))
+        log.error(f'Error: The "{column}" column does not exist on the input file')
+        log.error(f'Change the input file to contain the "{column}" column')
         log.error('or provide a custom column name with the "--column" arg')
         log.info(USAGE_HINT)
         exit(0)
 
     # Fetch and Write Output
-    f = open(outputfile, "a", encoding="utf8")
     log.info("Starting, it may take a while, please wait...")
     try:
+        # Fetch Species
+        search_result_list = []
         for name in scientific_names:
             log.info(f"## Looking up: {name}")
 
             # Non-scientific search tag enabled
             if name[-2:] == "-n":
-                name = GbifApi(name[:-2]).get_scientific_name()
+                gbif_service = GbifService()
+                name = gbif_service.fetch_scientific_name(name[:-2])
 
-            # Get Description
-            wiki_result = WikiApi(name)
-            description = wiki_result.get_description()
-            # Get Recommended Keyword
-            if description == "Not Found":
-                reco_keyword = wiki_result.get_recommended_keyword()
-                if reco_keyword != "Not Found":
-                    description = "Do you mean: {}".format(reco_keyword)
-            # Get GBIF Data from name
-            gbif_data = GbifApi(name).get_gbif_match()
-            # Get GBIF Data from similar name
-            if (
-                gbif_data == "Not Found"
-                and AUTO_SEARCH_SIMILAR_SPECIES
-                and description != "Not Found"
-            ):
-                similar_name = list_get(
-                    re.findall(name.split()[0] + " [a-z]+", description), 0
-                )
-                if similar_name:
-                    gbif_data = GbifApi(similar_name).get_gbif_match()
-            # Get GBIF Data from first word
-            if gbif_data == "Not Found" and name.split()[0] != name:
-                gbif_data = GbifApi(name.split()[0]).get_gbif_match()
-            f.write("### " + name)
+            search_result = SearchResult(name)
+            # Get Wiki Result
+            wiki_service = WikiService()
+            description = wiki_service.fetch_data(name)
+            search_result.set_description(description)
+            # Get GBIF Result
+            gbif_service = GbifService()
+            gbif_species_list = gbif_service.fetch_data(name, description)
+            search_result.extend(gbif_species_list)
+
+            search_result_list.append(search_result)
+
+        # Write Output
+        f = open(outputfile, "a", encoding="utf8")
+        for search_result in search_result_list:
+            f.write("### " + search_result.query)
             f.write("\n")
-            f.write(description or "Not Found")
+            f.write(search_result.description or "Not Found")
             f.write("\n")
-            f.write(gbif_data or "Not Found")
+            for species in search_result.species_list:
+                if species.match_type.lower() == "exact":
+                    f.write(
+                        "{} MATCH: {} {} | {} {} | {} | {}\nTaxonrank: {} > {} > {} > {} > {} > {} > {}".format(
+                            species.source,
+                            species.match_type,
+                            species.match_confidence,
+                            species.taxonomic_status,
+                            species.rank,
+                            species.canonical_name,
+                            species.authorship,
+                            species.taxon_kingdom,
+                            species.taxon_phylum,
+                            species.taxon_class,
+                            species.taxon_order,
+                            species.taxon_family,
+                            species.taxon_genus,
+                            species.taxon_species,
+                        )
+                    )
+                else:
+                    f.write(
+                        "{} SEARCH: {} {} | {} | {} | Taxonrank: {} > {} > {} > {} > {} > {} > {}".format(
+                            species.source,
+                            species.taxonomic_status,
+                            species.rank,
+                            species.canonical_name,
+                            species.authorship,
+                            species.taxon_kingdom,
+                            species.taxon_phylum,
+                            species.taxon_class,
+                            species.taxon_order,
+                            species.taxon_family,
+                            species.taxon_genus,
+                            species.taxon_species,
+                        )
+                    )
+                f.write("\n")
             f.write("\n")
-            f.write("\n")
+
         log.info("Done! :D")
     except requests.exceptions.RequestException:
         log.error(
