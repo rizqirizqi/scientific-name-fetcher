@@ -63,9 +63,10 @@ def generate_dataframe(search_result_list):
     for search_result in search_result_list:
         spec_list = DataFrame.from_records(
             [
-                {**{"Verbatim": search_result.query}, **s.to_dict()}
+                {**{"Key": search_result.key, "Verbatim": search_result.query}, **s.to_dict()}
                 for s in search_result.species_list
-            ]
+            ],
+            index="Key"
         )
         frames.append(spec_list)
     return concat(frames)

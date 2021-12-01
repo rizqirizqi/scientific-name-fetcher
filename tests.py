@@ -3,18 +3,19 @@ from unittest import TestCase, main as test_main
 from unittest.mock import patch
 from datetime import date
 from requests import Timeout
-from requests.exceptions import RequestException
 from scifetcher.services.wiki_service import WikiService
 from scifetcher import __main__
 
 
 class Tests(TestCase):
     def test_args(self):
-        testargs = ["scifetcher", "-i", "my_test_input.txt", "-o", "my_test_output.txt"]
+        testargs = ["scifetcher", "-i", "my_test_input.txt", "-o", "my_test_output.txt", "--id-col", "ID"]
         with patch.object(sys, "argv", testargs):
-            inputfile, outputfile, _ = __main__.readArgs()
+            inputfile, outputfile, name_column, id_column = __main__.read_args()
             self.assertEqual(inputfile, "my_test_input.txt")
             self.assertEqual(outputfile, "my_test_output.txt")
+            self.assertEqual(name_column, "Names")
+            self.assertEqual(id_column, "ID")
 
     def test_no_args(self):
         testargs = ["scifetcher"]
@@ -22,7 +23,7 @@ class Tests(TestCase):
             with patch("scifetcher.__main__.datetime") as mock_datetime:
                 mock_datetime.now.return_value = date(2021, 10, 31)
                 mock_datetime.side_effect = lambda *args, **kw: date(*args, **kw)
-                inputfile, outputfile, _ = __main__.readArgs()
+                inputfile, outputfile, _, _ = __main__.read_args()
                 self.assertEqual(inputfile, "input.txt")
                 self.assertEqual(outputfile, "result.2021-10-31.000000.txt")
 
