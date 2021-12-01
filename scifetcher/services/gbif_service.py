@@ -12,7 +12,7 @@ AUTO_SEARCH_SIMILAR_SPECIES = os.getenv("AUTO_SEARCH_SIMILAR_SPECIES") == "True"
 
 class GbifService(BaseService):
 
-    SEARCH_LIMIT = 6
+    SEARCH_LIMIT = 100
 
     def fetch_data(self, query, description):
         self.query = query
@@ -33,8 +33,8 @@ class GbifService(BaseService):
             # Get GBIF Data from first word
             if len(species_list) <= 0 and query.split()[0] != query:
                 species_list = self.fetch_gbif_search(query.split()[0])
-        except:
-            log.error("error!")
+        except Exception as e:
+            log.error(f"error! {e}")
         return species_list
 
     def fetch_gbif_search(self, query):
@@ -63,6 +63,10 @@ class GbifService(BaseService):
         species_list = []
         if data and data["count"] > 0:
             for data in data["results"]:
+                # filter constituentKey and taxonID to get backbone only result
+                # https://www.gbif.org/developer/species#p_datasetKey
+                if not "constituentKey" in data: continue
+                if "taxonID" in data: continue
                 encoded_query = re.sub(r"[^\w]", " ", query).strip().replace(" ", "%20")
                 species_list.append(
                     Species(
