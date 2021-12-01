@@ -61,6 +61,7 @@ def serialize_excel(outputfile, search_result_list):
 def generate_dataframe(search_result_list):
     frames = []
     for search_result in search_result_list:
+        if len(search_result.species_list) <= 0: continue
         spec_list = DataFrame.from_records(
             [
                 {**{"Key": search_result.key, "Verbatim": search_result.query}, **s.to_dict()}
@@ -69,4 +70,5 @@ def generate_dataframe(search_result_list):
             index="Key"
         )
         frames.append(spec_list)
+    if len(frames) <= 0: return DataFrame(frames)
     return concat(frames)

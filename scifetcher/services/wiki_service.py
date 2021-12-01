@@ -14,9 +14,9 @@ class WikiService:
             reco_keyword = self.get_recommended_keyword()
             if reco_keyword != None:
                 description = f"Do you mean: {reco_keyword}"
-        except:
-            log.error("error!")
-            description = "Error"
+        except Exception as e:
+            log.error(f"error! {e}")
+            description = "Error, please retry."
         return description
 
     def get_recommended_keyword(self):
