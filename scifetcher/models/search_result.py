@@ -1,5 +1,6 @@
 class SearchResult:
-    def __init__(self, query="") -> None:
+    def __init__(self, key, query) -> None:
+        self.key = key
         self.query = query
         self.species_list = []
 
