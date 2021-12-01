@@ -27,7 +27,7 @@ def read_args():
     name_column = "Names"  # default column name to be read from csv files
     try:
         opts, args = getopt.getopt(
-            sys.argv[1:], "hvi:o:c:", ["ifile=", "ofile=", "id-col=", "name-col"]
+            sys.argv[1:], "hvi:o:c:", ["ifile=", "ofile=", "id-col=", "name-col="]
         )
     except getopt.GetoptError:
         log.info(USAGE_HINT)
