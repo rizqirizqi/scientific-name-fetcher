@@ -10,7 +10,7 @@ class WikiService:
         try:
             description = self.fetch_description()
             if description != None:
-                return
+                return description
             reco_keyword = self.get_recommended_keyword()
             if reco_keyword != None:
                 description = f"Do you mean: {reco_keyword}"
