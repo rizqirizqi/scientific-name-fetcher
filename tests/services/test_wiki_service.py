@@ -1,11 +1,10 @@
 from unittest import TestCase, main as test_main
-from unittest.mock import patch
 from requests import Timeout
 from scifetcher.services.wiki_service import WikiService
 import responses
 
 
-class TestMain(TestCase):
+class TestWikiService(TestCase):
 
     extract = "Parkia speciosa (the bitter bean, twisted cluster bean, or stink bean) is a plant of the genus Parkia in the family Fabaceae.  It bears long, flat edible beans with bright green seeds the size and shape of plump almonds which have a rather peculiar smell, similar to, but stronger than that of the shiitake mushroom, due to sulfur-containing compounds also found in shiitake, truffles and cabbage."
 
@@ -49,8 +48,14 @@ class TestMain(TestCase):
         description = WikiService().fetch_data("Abarema clypearia")
         self.assertEqual(description, "Do you mean: Archidendron clypearia")
 
-    @patch("scifetcher.services.wiki_service.requests.get", side_effect=Timeout())
-    def test_fetch_data_timeout(self, mocked_get):
+    @responses.activate
+    def test_fetch_data_timeout(self):
+        responses.add(
+            responses.GET,
+            "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exlimit=max&format=json&exsentences=2&origin=%2A&exintro=true&explaintext=true&generator=search&gsrsearch=Parkia+speciosa",
+            body=Timeout(),
+            status=200,
+        )
         description = WikiService().fetch_data("Parkia speciosa")
         self.assertEqual(description, "Error, please retry.")
 
