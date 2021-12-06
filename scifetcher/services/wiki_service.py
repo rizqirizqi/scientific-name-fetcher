@@ -11,7 +11,7 @@ class WikiService:
             description = self.fetch_description()
             if description != None:
                 return description
-            reco_keyword = self.get_recommended_keyword()
+            reco_keyword = self.fetch_recommended_keyword()
             if reco_keyword != None:
                 description = f"Do you mean: {reco_keyword}"
         except Exception as e:
@@ -19,8 +19,8 @@ class WikiService:
             description = "Error, please retry."
         return description
 
-    def get_recommended_keyword(self):
-        log.debug(f"get_recommended_keyword: {self.query}...")
+    def fetch_recommended_keyword(self):
+        log.debug(f"fetch_recommended_keyword: {self.query}...")
         params = {"action": "opensearch", "search": self.query}
         response = requests.get(
             f"https://commons.wikimedia.org/w/api.php", params=params

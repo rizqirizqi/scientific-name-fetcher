@@ -7,9 +7,10 @@ SCORE_THRESHOLD = 50
 def fuzzy_search(text, query):
     tokens = re.sub(r'\b\w{1,3}\b', '', text).split()
     scores = []
-    for q in query.split():
-        scores.extend(extract(q, tokens, limit=2, scorer=token_sort_ratio))
-    scores = sorted(scores, key=lambda tup: tup[1], reverse=True)
+    query_tokens = query.split()
+    for q in query_tokens:
+        scores.extend(extract(q, tokens, limit=1, scorer=token_sort_ratio))
     if scores[0][1] <= SCORE_THRESHOLD:
         return None
-    return list(map(lambda tup: tup[0], scores))
+    matches = list(map(lambda tup: tup[0], scores))
+    return ' '.join(matches[:len(query_tokens)])
