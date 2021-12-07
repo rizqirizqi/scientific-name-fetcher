@@ -1,36 +1,32 @@
-import os
 import re
 import logging as log
 import requests
+from scifetcher.config import ENV_CONFIG
 from scifetcher.helpers.list import list_get
+from scifetcher.helpers.string import fuzzy_search
 from scifetcher.models.species import Species
 from scifetcher.services.base_service import BaseService
-
-INCLUDE_GBIF_SEARCH = os.getenv("INCLUDE_GBIF_SEARCH") == "True"
-AUTO_SEARCH_SIMILAR_SPECIES = os.getenv("AUTO_SEARCH_SIMILAR_SPECIES") == "True"
 
 
 class GbifService(BaseService):
 
     SEARCH_LIMIT = 100
 
-    def fetch_data(self, query, description):
-        self.query = query
+    def fetch_data(self, query, description = None):
         species_list = []
         try:
-            # Get GBIF Data from name
+            # Get data from query
             species_list = self.fetch_gbif_search(query)
-            # Get GBIF Data from similar name
+            # Get data from similar query
             if (
                 len(species_list) <= 0
-                and AUTO_SEARCH_SIMILAR_SPECIES
+                and ENV_CONFIG["AUTO_SEARCH_SIMILAR_SPECIES"]
                 and description != None
             ):
-                match = re.findall(query.split()[0] + " [a-z]+", description)
-                similar_name = list_get(match, 0)
-                if similar_name:
+                similar_name = fuzzy_search(description, query)
+                if similar_name and query != similar_name:
                     species_list = self.fetch_gbif_search(similar_name)
-            # Get GBIF Data from first word
+            # Get data from first word
             if len(species_list) <= 0 and query.split()[0] != query:
                 species_list = self.fetch_gbif_search(query.split()[0])
         except Exception as e:
@@ -65,8 +61,10 @@ class GbifService(BaseService):
             for data in data["results"]:
                 # filter constituentKey and taxonID to get backbone only result
                 # https://www.gbif.org/developer/species#p_datasetKey
-                if not "constituentKey" in data: continue
-                if "taxonID" in data: continue
+                if not "constituentKey" in data:
+                    continue
+                if "taxonID" in data:
+                    continue
                 encoded_query = re.sub(r"[^\w]", " ", query).strip().replace(" ", "%20")
                 species_list.append(
                     Species(
@@ -128,7 +126,7 @@ class GbifService(BaseService):
                         match_confidence=data.get("confidence"),
                     )
                 ]
-        elif INCLUDE_GBIF_SEARCH:
+        elif ENV_CONFIG["INCLUDE_GBIF_SEARCH"]:
             return self.fetch_gbif_search(query)
         else:
             log.debug("notfound!")

@@ -1,8 +1,29 @@
 class Species:
+
+    source: str
+    id: str
+    url: str
+    search_url: str
+    taxonomic_status: str
+    rank: str
+    accepted_name: str
+    scientific_name: str
+    canonical_name: str
+    authorship: str
+    taxon_kingdom: str
+    taxon_phylum: str
+    taxon_class: str
+    taxon_order: str
+    taxon_family: str
+    taxon_genus: str
+    taxon_species: str
+    match_type: str
+    match_confidence: int
+
     def __init__(
         self,
         source="",
-        id="",
+        id=None,
         url="",
         search_url="",
         taxonomic_status="",
@@ -66,3 +87,6 @@ class Species:
             "URL": self.url,
             "Search URL": self.search_url,
         }
+
+    def __eq__(self, other):
+        return self.source == other.source and self.id == other.id and self.scientific_name == other.scientific_name
