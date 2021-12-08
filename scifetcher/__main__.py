@@ -6,9 +6,11 @@ import logging as log
 from datetime import datetime
 from pandas import read_csv, read_excel, DataFrame
 from dotenv import load_dotenv
+from scifetcher.helpers.concurrent import run_concurrently
 from scifetcher.models.search_result import SearchResult
 from scifetcher.serializer import serialize
 from scifetcher.services.gbif_service import GbifService
+from scifetcher.services.iucn_service import IucnService
 from scifetcher.services.wiki_service import WikiService
 from scifetcher.models.species import Species
 
@@ -117,10 +119,19 @@ if __name__ == "__main__":
             wiki_service = WikiService()
             description = wiki_service.fetch_data(name)
             search_result.set_description(description)
-            # Get GBIF Result
+            # Get Species Result
             gbif_service = GbifService()
-            gbif_species_list = gbif_service.fetch_data(name, description)
-            search_result.extend(gbif_species_list)
+            iucn_service = IucnService()
+            [gbif_species_list, iucn_species_list] = run_concurrently(
+                [
+                    (gbif_service.fetch_data, (name, description)),
+                    (iucn_service.fetch_data, (name, description)),
+                ]
+            )
+            if gbif_species_list:
+                search_result.extend(gbif_species_list)
+            if iucn_species_list:
+                search_result.extend(iucn_species_list)
 
             search_result_list.append(search_result)
 

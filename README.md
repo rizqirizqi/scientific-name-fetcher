@@ -11,7 +11,7 @@ Fetch plants/animals scientific name information from the internet.
 
 Current supported sources:
 - Wikipedia
-- Global Biodiversity Information Facility (GBIF)
+- [Global Biodiversity Information Facility (GBIF)](https://www.gbif.org/developer)
 
 ## Requirements
 - [python >= 3.7](https://www.python.org/downloads/) (you can use [pyenv](https://github.com/pyenv/pyenv) for easier python version management)
@@ -76,15 +76,16 @@ pipenv run python -m scifetcher --help
 
 ## Settings
 
-1. Edit .env file
+1. Edit .env file (see env.sample file for reference)
 2. Change the settings
 
 ### Available settings:
 
 | Setting                     | Default | Description |
-|-----------------------------|:-------:|------------:|
-| INCLUDE_GBIF_SEARCH         |  True   | Include GBIF search result if it can't find the exact match of the scientific name |
-| AUTO_SEARCH_SIMILAR_SPECIES |  True   | Search GBIF database with similar name from wikipedia result |
+|-----------------------------|:-------:|-------------|
+| AUTO_SEARCH_SIMILAR_SPECIES |  True   | Search GBIF database with similar name from wikipedia result. |
+| INCLUDE_GBIF_SEARCH         |  True   | Include GBIF search result if it can't find the exact match of the scientific name. |
+| IUCN_API_TOKEN              |    -    | Required token to fetch data from IUCN API. Generate token [here](https://apiv3.iucnredlist.org/api/v3/token). |
 
 ## Contributing
 1. Fork this repo
