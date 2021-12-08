@@ -123,19 +123,23 @@ if __name__ == "__main__":
 
     # Show warnings and errors
     if source == "IUCN" and not ENV_CONFIG["IUCN_API_TOKEN"]:
-        log.error("[Error] IUCN_API_TOKEN is not set, set it on .env file if you need data source from IUCN")
+        log.error(
+            "[Error] IUCN_API_TOKEN is not set, set it on .env file if you need data source from IUCN"
+        )
         sys.exit(2)
     elif not ENV_CONFIG["IUCN_API_TOKEN"]:
-        log.warning("[Warning] IUCN_API_TOKEN is not set, set it on .env file if you need data source from IUCN")
+        log.warning(
+            "[Warning] IUCN_API_TOKEN is not set, set it on .env file if you need data source from IUCN"
+        )
 
     # Read Input
     scientific_names = read_input(inputfile, name_column, id_column)
 
     # Fetch and Write Output
     log.info("Starting, it may take a while, please wait...")
+    search_result_list = []
     try:
         # Fetch Species
-        search_result_list = []
         for index, row in scientific_names.iterrows():
             key = row[id_column] if id_column else index
             name = row[name_column]
@@ -167,11 +171,16 @@ if __name__ == "__main__":
 
             search_result_list.append(search_result)
 
-        # Write Output
-        serialize(outputfile, search_result_list)
-
         log.info("Done! :D")
     except Exception as e:
         log.exception(
-            "Error occurred. Please try again. Contact the maintainer if the problem persist."
+            "[Error] Error occurred. Please try again. Contact the maintainer if the problem persist."
+        )
+
+    # Write Output
+    try:
+        serialize(outputfile, search_result_list)
+    except Exception as e:
+        log.exception(
+            "[Error] Can't write output. Please try again. Contact the maintainer if the problem persist."
         )
