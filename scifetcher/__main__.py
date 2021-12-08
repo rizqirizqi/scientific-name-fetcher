@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from scifetcher.config import ENV_CONFIG
 from scifetcher.helpers.concurrent import run_concurrently
 from scifetcher.models.search_result import SearchResult
+from scifetcher.models.species import Species
 from scifetcher.serializer import serialize
 from scifetcher.services.gbif_service import GbifService
 from scifetcher.services.iucn_service import IucnService
@@ -168,6 +169,9 @@ if __name__ == "__main__":
                 search_result.extend(gbif_species_list)
             if iucn_species_list:
                 search_result.extend(iucn_species_list)
+
+            if len(search_result.species_list) <= 0:
+                search_result.append(Species())
 
             search_result_list.append(search_result)
 
