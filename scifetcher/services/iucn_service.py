@@ -25,7 +25,7 @@ class IucnService(BaseService):
                 if similar_name and query != similar_name:
                     species_list = self.search_species(similar_name)
         except Exception as e:
-            log.error(f"error! {query} {e}")
+            log.error(f"[Error] {query} {e}")
         return species_list
 
     def search_species(self, query):

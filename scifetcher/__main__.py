@@ -6,6 +6,7 @@ import logging as log
 from datetime import datetime
 from pandas import read_csv, read_excel, DataFrame
 from dotenv import load_dotenv
+from scifetcher.config import ENV_CONFIG
 from scifetcher.helpers.concurrent import run_concurrently
 from scifetcher.models.search_result import SearchResult
 from scifetcher.serializer import serialize
@@ -57,7 +58,7 @@ def read_args():
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             log.info(USAGE_HINT)
-            sys.exit(2)
+            sys.exit(0)
         elif opt in ("-i", "--ifile"):
             inputfile = arg
         elif opt in ("-o", "--ofile"):
@@ -103,7 +104,7 @@ def read_input(inputfile, name_column, id_column) -> DataFrame:
                 raise KeyError
         return scientific_names
     except KeyError as column:
-        log.error(f'Error: The "{column}" column does not exist on the input file')
+        log.error(f'[Error] The "{column}" column does not exist on the input file')
         log.error(f"Change the input file to contain the correct column")
         log.error(
             'or provide a custom column name with the "--id-col" or "--name-col" arg'
@@ -113,12 +114,19 @@ def read_input(inputfile, name_column, id_column) -> DataFrame:
 
 
 if __name__ == "__main__":
-    # Setup File
+    # Read args and setup File
     inputfile, outputfile, source, name_column, id_column = read_args()
     if not os.path.isfile(inputfile):
         log.error("Input file not found, please check your command.")
         log.info(USAGE_HINT)
         sys.exit(2)
+
+    # Show warnings and errors
+    if source == "IUCN" and not ENV_CONFIG["IUCN_API_TOKEN"]:
+        log.error("[Error] IUCN_API_TOKEN is not set, set it on .env file if you need data source from IUCN")
+        sys.exit(2)
+    elif not ENV_CONFIG["IUCN_API_TOKEN"]:
+        log.warning("[Warning] IUCN_API_TOKEN is not set, set it on .env file if you need data source from IUCN")
 
     # Read Input
     scientific_names = read_input(inputfile, name_column, id_column)
@@ -148,7 +156,7 @@ if __name__ == "__main__":
                     if source in ["ALL", "GBIF"]
                     else None,
                     (IucnService().fetch_data, (name, description))
-                    if source in ["ALL", "IUCN"]
+                    if source in ["ALL", "IUCN"] and ENV_CONFIG["IUCN_API_TOKEN"]
                     else None,
                 ]
             )

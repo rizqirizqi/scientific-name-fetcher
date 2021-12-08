@@ -31,7 +31,7 @@ class GbifService(BaseService):
             if len(species_list) <= 0 and query.split()[0] != query:
                 species_list = self.fetch_gbif_search(query.split()[0])
         except Exception as e:
-            log.error(f"error! {query} {e}")
+            log.error(f"[Error] {query} {e}")
         return species_list
 
     def fetch_gbif_search(self, query):
