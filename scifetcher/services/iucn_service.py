@@ -51,7 +51,7 @@ class IucnService(BaseService):
             log.debug("notfound!")
             return []
         for idx, species in enumerate(species_list):
-            if idx == 0:
+            if ori_species_result and idx == 0:
                 continue
             [species_result, species_url] = run_concurrently(
                 [
@@ -128,6 +128,7 @@ class IucnService(BaseService):
             species.id = species_result.get("accepted_id")
             species.scientific_name = f"{species_result.get('synonym')} {species_result.get('syn_authority')}".strip()
             species.accepted_name = f"{species_result.get('accepted_name')} {species_result.get('authority')}".strip()
+            species.canonical_name = species_result.get("accepted_name")
         if species_result and species_result.get("taxonid"):
             species.id = species_result.get("taxonid")
             if not species.scientific_name:

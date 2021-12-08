@@ -15,7 +15,6 @@ from scifetcher.services.iucn_service import IucnService
 class TestIucnService(TestCase):
 
     maxDiff = None
-    description = "Parkia speciasa (the bitter bean, twisted cluster bean, or stink bean) is a plant of the genus Parkia in the family Fabaceae.  It bears long, flat edible beans with bright green seeds the size and shape of plump almonds which have a rather peculiar smell, similar to, but stronger than that of the shiitake mushroom, due to sulfur-containing compounds also found in shiitake, truffles and cabbage."
 
     @responses.activate
     def test_fetch_data_search_success(self):
@@ -228,8 +227,8 @@ class TestIucnService(TestCase):
             iucn_species_list[1].to_dict(),
             {
                 "Accepted Name": "Wrightia novobritannica (Ngan) D.J.Middleton",
-                "Authorship": "R. Br.",
-                "Canonical Name": "Wrightia pubescens",
+                "Authorship": "(Ngan) D.J.Middleton",
+                "Canonical Name": "Wrightia novobritannica",
                 "Class": "MAGNOLIOPSIDA",
                 "Confidence": 0,
                 "Family": "APOCYNACEAE",
@@ -242,19 +241,19 @@ class TestIucnService(TestCase):
                 "Scientific Name": "Wrightia pubescens R.Br.",
                 "Search URL": "",
                 "Source": "IUCN",
-                "Source Key": 62544,
-                "Species": "Wrightia pubescens",
+                "Source Key": 143755417,
+                "Species": "Wrightia novobritannica",
                 "Status": "",
-                "Threat Status": "LC",
-                "URL": "https://www.iucnredlist.org/species/145672353/145672355",
+                "Threat Status": "DD",
+                "URL": "https://www.iucnredlist.org/species/145672353/145672356",
             },
         )
         self.assertDictEqual(
             iucn_species_list[2].to_dict(),
             {
                 "Accepted Name": "Wrightia candollei S.Vidal",
-                "Authorship": "R. Br.",
-                "Canonical Name": "Wrightia pubescens",
+                "Authorship": "S.Vidal",
+                "Canonical Name": "Wrightia candollei",
                 "Class": "MAGNOLIOPSIDA",
                 "Confidence": 0,
                 "Family": "APOCYNACEAE",
@@ -267,11 +266,125 @@ class TestIucnService(TestCase):
                 "Scientific Name": "Wrightia pubescens Roth",
                 "Search URL": "",
                 "Source": "IUCN",
-                "Source Key": 62544,
-                "Species": "Wrightia pubescens",
+                "Source Key": 154610271,
+                "Species": "Wrightia candollei",
+                "Status": "",
+                "Threat Status": "NT",
+                "URL": "https://www.iucnredlist.org/species/145672353/145672357",
+            },
+        )
+
+    @responses.activate
+    def test_fetch_data_search_synonym_success(self):
+        responses.add(
+            responses.GET,
+            "https://apiv3.iucnredlist.org/api/v3/species/synonym/Cassia%20alata?token=1UCN_4P1_T0K3N",
+            json={
+                "name": "Cassia alata",
+                "count": 1,
+                "result": [
+                    {
+                        "accepted_id": 144263375,
+                        "accepted_name": "Senna alata",
+                        "authority": "(L.) Roxb.",
+                        "synonym": "Cassia alata",
+                        "syn_authority": "L.",
+                    }
+                ],
+            },
+            status=200,
+        )
+        responses.add(
+            responses.GET,
+            "https://apiv3.iucnredlist.org/api/v3/species/Cassia%20alata?token=1UCN_4P1_T0K3N",
+            json={"value": "0", "species": "Cassia alata"},
+            status=200,
+        )
+        responses.add(
+            responses.GET,
+            "https://apiv3.iucnredlist.org/api/v3/weblink/Cassia%20alata",
+            json={
+                "rlurl": "https://www.iucnredlist.org/species/144263375/149048081",
+                "species": "Cassia alata",
+            },
+            status=200,
+        )
+        responses.add(
+            responses.GET,
+            "https://apiv3.iucnredlist.org/api/v3/species/Senna%20alata?token=1UCN_4P1_T0K3N",
+            json={
+                "name": "Senna alata",
+                "result": [
+                    {
+                        "taxonid": 144263375,
+                        "scientific_name": "Senna alata",
+                        "kingdom": "PLANTAE",
+                        "phylum": "TRACHEOPHYTA",
+                        "class": "MAGNOLIOPSIDA",
+                        "order": "FABALES",
+                        "family": "FABACEAE",
+                        "genus": "Senna",
+                        "main_common_name": None,
+                        "authority": "(L.) Roxb.",
+                        "published_year": 2019,
+                        "assessment_date": "2018-06-12",
+                        "category": "LC",
+                        "criteria": None,
+                        "population_trend": "Stable",
+                        "marine_system": False,
+                        "freshwater_system": False,
+                        "terrestrial_system": True,
+                        "assessor": "Botanic Gardens Conservation International (BGCI) & IUCN SSC Global Tree Specialist Group",
+                        "reviewer": "Oldfield, S.",
+                        "aoo_km2": "1188.00",
+                        "eoo_km2": "11649465.11",
+                        "elevation_upper": None,
+                        "elevation_lower": None,
+                        "depth_upper": None,
+                        "depth_lower": None,
+                        "errata_flag": None,
+                        "errata_reason": None,
+                        "amended_flag": None,
+                        "amended_reason": None,
+                    }
+                ],
+            },
+            status=200,
+        )
+        responses.add(
+            responses.GET,
+            "https://apiv3.iucnredlist.org/api/v3/weblink/Senna%20alata",
+            json={
+                "rlurl": "https://www.iucnredlist.org/species/144263375/149048081",
+                "species": "Senna alata",
+            },
+            status=200,
+        )
+        iucn_species_list = IucnService().fetch_data("Cassia alata", None)
+        self.assertEqual(len(iucn_species_list), 1)
+        self.assertDictEqual(
+            iucn_species_list[0].to_dict(),
+            {
+                "Accepted Name": "Senna alata (L.) Roxb.",
+                "Authorship": "(L.) Roxb.",
+                "Canonical Name": "Senna alata",
+                "Class": "MAGNOLIOPSIDA",
+                "Confidence": 0,
+                "Family": "FABACEAE",
+                "Genus": "Senna",
+                "Kingdom": "PLANTAE",
+                "MatchType": "",
+                "Order": "FABALES",
+                "Phylum": "TRACHEOPHYTA",
+                "Rank": "SPECIES",
+                "Scientific Name": "Cassia alata L.",
+                "Search URL": "",
+                "Source": "IUCN",
+                "Source Key": 144263375,
+                "Species": "Senna alata",
                 "Status": "",
                 "Threat Status": "LC",
-                "URL": "https://www.iucnredlist.org/species/145672353/145672355",
+                "URL": "https://www.iucnredlist.org/species/144263375/149048081",
             },
         )
 
