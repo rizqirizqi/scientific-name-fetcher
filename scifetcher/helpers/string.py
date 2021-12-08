@@ -10,7 +10,7 @@ def fuzzy_search(text, query):
     query_tokens = query.split()
     for q in query_tokens:
         scores.extend(extract(q, tokens, limit=1, scorer=token_sort_ratio))
-    if scores[0][1] <= SCORE_THRESHOLD:
+    if len(scores) <= 0 or scores[0][1] <= SCORE_THRESHOLD:
         return None
     matches = list(map(lambda tup: tup[0], scores))
     return ' '.join(matches[:len(query_tokens)])

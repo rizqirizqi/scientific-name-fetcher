@@ -25,8 +25,7 @@ class IucnService(BaseService):
                 if similar_name and query != similar_name:
                     species_list = self.search_species(similar_name)
         except Exception as e:
-            log.error(f"error! {e}")
-            raise e
+            log.error(f"error! {query} {e}")
         return species_list
 
     def search_species(self, query):
@@ -48,21 +47,20 @@ class IucnService(BaseService):
                 query, ori_species_result, ori_species_url
             )
             species_list.insert(0, original_species)
-        if not isinstance(species_list, list):
-            log.debug("notfound!")
-            return []
         if len(species_list) <= 0:
             log.debug("notfound!")
             return []
-        for species in species_list:
+        for idx, species in enumerate(species_list):
+            if idx == 0:
+                continue
             [species_result, species_url] = run_concurrently(
                 [
-                    (self.fetch_species, species.scientific_name),
-                    (self.fetch_species_url, species.scientific_name),
+                    (self.fetch_species, species.canonical_name),
+                    (self.fetch_species_url, species.canonical_name),
                 ]
             )
             species = self.create_species_from_result(
-                species.scientific_name, species_result, species_url, species
+                species.canonical_name, species_result, species_url, species
             )
         log.debug("found!")
         return species_list
@@ -95,7 +93,7 @@ class IucnService(BaseService):
         if data.get("species"):
             log.debug("notfound!")
             return None
-        species_result = (data.get("result") or [])[0]
+        species_result = data.get("result")[0]
         log.debug("found!")
         return species_result
 
@@ -112,13 +110,8 @@ class IucnService(BaseService):
             log.debug("notfound!")
             return []
         species_list = []
-        for item in data.get("result") or []:
-            species = self.create_species_from_result(query)
-            species.id = item.get("accepted_id")
-            species.scientific_name = item.get("accepted_name")
-            species.accepted_name = (
-                f"{item.get('accepted_name')} {item.get('authority')}"
-            )
+        for species_result in data.get("result") or []:
+            species = self.create_species_from_result(query, species_result)
             species_list.append(species)
         log.debug("found!")
         return species_list
@@ -129,12 +122,18 @@ class IucnService(BaseService):
         if not species:
             species = Species()
             species.source = "IUCN"
-            species.scientific_name = query
-            species.taxonomic_status = "ACCEPTED"
+            species.canonical_name = query
             species.rank = "SPECIES"
+        if species_result and species_result.get("accepted_id"):
+            species.id = species_result.get("accepted_id")
+            species.scientific_name = f"{species_result.get('synonym')} {species_result.get('syn_authority')}".strip()
+            species.accepted_name = f"{species_result.get('accepted_name')} {species_result.get('authority')}".strip()
         if species_result and species_result.get("taxonid"):
             species.id = species_result.get("taxonid")
-            species.scientific_name = species_result.get("scientific_name")
+            if not species.scientific_name:
+                species.scientific_name = f"{species_result.get('scientific_name')} {species_result.get('authority')}".strip()
+            if not species.accepted_name:
+                species.accepted_name = f"{species_result.get('scientific_name')} {species_result.get('authority')}".strip()
             species.canonical_name = species_result.get("scientific_name")
             species.authorship = species_result.get("authority")
             species.taxon_kingdom = species_result.get("kingdom")
@@ -144,6 +143,7 @@ class IucnService(BaseService):
             species.taxon_family = species_result.get("family")
             species.taxon_genus = species_result.get("genus")
             species.taxon_species = species_result.get("scientific_name")
+            species.threat_status = species_result.get("category")
         if species_url:
             species.url = species_url
         return species

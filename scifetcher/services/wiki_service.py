@@ -15,7 +15,7 @@ class WikiService:
             if reco_keyword != None:
                 description = f"Do you mean: {reco_keyword}"
         except Exception as e:
-            log.error(f"error! {e}")
+            log.error(f"error! {query} {e}")
             description = "Error, please retry."
         return description
 

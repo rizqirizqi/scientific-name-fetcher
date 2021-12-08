@@ -17,6 +17,7 @@ class Species:
     taxon_family: str
     taxon_genus: str
     taxon_species: str
+    threat_status: str
     match_type: str
     match_confidence: int
 
@@ -39,6 +40,7 @@ class Species:
         taxon_family="",
         taxon_genus="",
         taxon_species="",
+        threat_status="",
         match_type="",
         match_confidence=0,
     ) -> None:
@@ -59,6 +61,7 @@ class Species:
         self.taxon_family = taxon_family
         self.taxon_genus = taxon_genus
         self.taxon_species = taxon_species
+        self.threat_status = threat_status
         self.match_type = match_type
         self.match_confidence = match_confidence
 
@@ -82,6 +85,7 @@ class Species:
             "Family": self.taxon_family,
             "Genus": self.taxon_genus,
             "Species": self.taxon_species,
+            "Threat Status": self.threat_status,
             "MatchType": self.match_type,
             "Confidence": self.match_confidence,
             "URL": self.url,

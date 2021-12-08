@@ -3,6 +3,7 @@ import logging as log
 import requests
 from scifetcher.config import ENV_CONFIG
 from scifetcher.helpers.list import list_get
+from scifetcher.helpers.scientific import threat_status_name_to_symbol
 from scifetcher.helpers.string import fuzzy_search
 from scifetcher.models.species import Species
 from scifetcher.services.base_service import BaseService
@@ -12,7 +13,7 @@ class GbifService(BaseService):
 
     SEARCH_LIMIT = 100
 
-    def fetch_data(self, query, description = None):
+    def fetch_data(self, query, description=None):
         species_list = []
         try:
             # Get data from query
@@ -30,7 +31,7 @@ class GbifService(BaseService):
             if len(species_list) <= 0 and query.split()[0] != query:
                 species_list = self.fetch_gbif_search(query.split()[0])
         except Exception as e:
-            log.error(f"error! {e}")
+            log.error(f"error! {query} {e}")
         return species_list
 
     def fetch_gbif_search(self, query):
@@ -58,33 +59,36 @@ class GbifService(BaseService):
         data = response.json()
         species_list = []
         if data and data["count"] > 0:
-            for data in data["results"]:
+            for item in data["results"]:
                 # filter constituentKey and taxonID to get backbone only result
                 # https://www.gbif.org/developer/species#p_datasetKey
-                if not "constituentKey" in data:
+                if not "constituentKey" in item:
                     continue
-                if "taxonID" in data:
+                if "taxonID" in item:
                     continue
                 encoded_query = re.sub(r"[^\w]", " ", query).strip().replace(" ", "%20")
                 species_list.append(
                     Species(
                         source="GBIF",
-                        id=data.get("key"),
-                        url=f"https://www.gbif.org/species/{data.get('key')}",
+                        id=item.get("key"),
+                        url=f"https://www.gbif.org/species/{item.get('key')}",
                         search_url=f"https://www.gbif.org/species/search?q={encoded_query}",
-                        taxonomic_status=data.get("taxonomicStatus"),
-                        rank=data.get("rank"),
-                        accepted_name=data.get("accepted"),
-                        scientific_name=data.get("scientificName"),
-                        canonical_name=data.get("canonicalName"),
-                        authorship=data.get("authorship"),
-                        taxon_kingdom=data.get("kingdom"),
-                        taxon_phylum=data.get("phylum"),
-                        taxon_class=data.get("class"),
-                        taxon_order=data.get("order"),
-                        taxon_family=data.get("family"),
-                        taxon_genus=data.get("genus"),
-                        taxon_species=data.get("species"),
+                        taxonomic_status=item.get("taxonomicStatus"),
+                        rank=item.get("rank"),
+                        accepted_name=item.get("accepted"),
+                        scientific_name=item.get("scientificName"),
+                        canonical_name=item.get("canonicalName"),
+                        authorship=item.get("authorship"),
+                        taxon_kingdom=item.get("kingdom"),
+                        taxon_phylum=item.get("phylum"),
+                        taxon_class=item.get("class"),
+                        taxon_order=item.get("order"),
+                        taxon_family=item.get("family"),
+                        taxon_genus=item.get("genus"),
+                        taxon_species=item.get("species"),
+                        threat_status=threat_status_name_to_symbol(
+                            list_get(item.get("threatStatuses"), 0, "")
+                        ),
                     )
                 )
             log.debug("found!")
@@ -122,6 +126,9 @@ class GbifService(BaseService):
                         taxon_family=data.get("family"),
                         taxon_genus=data.get("genus"),
                         taxon_species=data.get("species"),
+                        threat_status=threat_status_name_to_symbol(
+                            list_get(data.get("threatStatuses"), 0, "")
+                        ),
                         match_type=data.get("matchType"),
                         match_confidence=data.get("confidence"),
                     )

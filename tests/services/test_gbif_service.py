@@ -12,6 +12,7 @@ from scifetcher.services.gbif_service import GbifService
 )
 class TestGbifService(TestCase):
 
+    maxDiff = None
     description = "Parkia speciasa (the bitter bean, twisted cluster bean, or stink bean) is a plant of the genus Parkia in the family Fabaceae.  It bears long, flat edible beans with bright green seeds the size and shape of plump almonds which have a rather peculiar smell, similar to, but stronger than that of the shiitake mushroom, due to sulfur-containing compounds also found in shiitake, truffles and cabbage."
 
     @responses.activate
@@ -27,6 +28,7 @@ class TestGbifService(TestCase):
                         "constituentKey": 1,
                         "taxonomicStatus": "ACCEPTED",
                         "rank": "SPECIES",
+                        "accepted": "Parkia speciosa",
                         "scientificName": "Parkia speciosa Hassk.",
                         "canonicalName": "Parkia speciosa",
                         "authorship": "Hassk.",
@@ -37,11 +39,13 @@ class TestGbifService(TestCase):
                         "family": "Fabaceae",
                         "genus": "Parkia",
                         "species": "Parkia speciosa",
+                        "threatStatuses": ["LEAST_CONCERN"],
                     },
                     {
                         "key": 2,
                         "taxonomicStatus": "ACCEPTED",
                         "rank": "SPECIES",
+                        "accepted": "Parkia speciosa",
                         "scientificName": "Parkia speciosa",
                         "canonicalName": "Parkia speciosa",
                         "authorship": "",
@@ -59,6 +63,7 @@ class TestGbifService(TestCase):
                         "taxonID": 3,
                         "taxonomicStatus": "ACCEPTED",
                         "rank": "SPECIES",
+                        "accepted": "Parkia speciosa",
                         "scientificName": "Parkia speciosa",
                         "canonicalName": "Parkia speciosa",
                         "authorship": "",
@@ -78,9 +83,30 @@ class TestGbifService(TestCase):
             "Parkia speciosa", self.description
         )
         self.assertEqual(len(gbif_species_list), 1)
-        self.assertEqual(
-            gbif_species_list[0],
-            Species(source="GBIF", id=1, scientific_name="Parkia speciosa Hassk."),
+        self.assertDictEqual(
+            gbif_species_list[0].to_dict(),
+            {
+                "Accepted Name": "Parkia speciosa",
+                "Authorship": "Hassk.",
+                "Canonical Name": "Parkia speciosa",
+                "Class": "Magnoliopsida",
+                "Confidence": 0,
+                "Family": "Fabaceae",
+                "Genus": "Parkia",
+                "Kingdom": "Viridiplantae",
+                "MatchType": "",
+                "Order": "Fabales",
+                "Phylum": "Streptophyta",
+                "Rank": "SPECIES",
+                "Scientific Name": "Parkia speciosa Hassk.",
+                "Search URL": "https://www.gbif.org/species/search?q=Parkia%20speciosa",
+                "Source": "GBIF",
+                "Source Key": 1,
+                "Species": "Parkia speciosa",
+                "Status": "ACCEPTED",
+                "Threat Status": "LC",
+                "URL": "https://www.gbif.org/species/1",
+            },
         )
 
     @responses.activate
