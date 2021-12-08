@@ -17,7 +17,18 @@ from scifetcher.models.species import Species
 # Load settings
 load_dotenv()
 
-USAGE_HINT = "USAGE:\npipenv run python -m scifetcher <OPTIONS>\n\nOPTIONS:\n-i <inputfile>\n-o <outputfile>\n--id-col <id_column>\n--name-col <name_column>\n-v"
+USAGE_HINT = "\
+USAGE:\n\
+pipenv run python -m scifetcher <OPTIONS>\n\
+\n\
+OPTIONS:\n\
+    -s <source>                 | Set data source. Available source: GBIF, IUCN\n\
+    -i <inputfile>              | Set input file\n\
+    -o <outputfile>             | Set output file\n\
+    --id-col <id_column>        | Set id column from input csv/xlsx\n\
+    --name-col <name_column>    | Set name column from input csv/xlsx\n\
+    -v                          | Verbose log\n\
+"
 
 log.basicConfig(format="%(message)s", level=log.INFO)
 
@@ -25,11 +36,14 @@ log.basicConfig(format="%(message)s", level=log.INFO)
 def read_args():
     inputfile = "input.txt"
     outputfile = datetime.now().strftime("result.%Y-%m-%d.%H%M%S.txt")
+    source = "ALL"
     id_column = None
     name_column = "Names"  # default column name to be read from csv files
     try:
         opts, args = getopt.getopt(
-            sys.argv[1:], "hvi:o:c:", ["ifile=", "ofile=", "id-col=", "name-col="]
+            sys.argv[1:],
+            "hvi:o:s:",
+            ["ifile=", "ofile=", "source=", "id-col=", "name-col="],
         )
     except getopt.GetoptError:
         log.info(USAGE_HINT)
@@ -42,6 +56,8 @@ def read_args():
             inputfile = arg
         elif opt in ("-o", "--ofile"):
             outputfile = arg
+        elif opt in ("-s", "--source"):
+            source = arg
         elif opt in ("--id-col"):
             id_column = arg
         elif opt in ("--name-col"):
@@ -50,11 +66,13 @@ def read_args():
             log.getLogger().setLevel(level=log.DEBUG)
     log.info(f"Input file: {inputfile}")
     log.info(f"Output file: {outputfile}")
+    if source != "ALL":
+        log.info(f"Source: {source}")
     if id_column:
         log.info(f"ID Column: {id_column}")
     log.info(f"Name Column: {name_column}")
     log.info("---------------------------------------------")
-    return inputfile, outputfile, name_column, id_column
+    return inputfile, outputfile, source, name_column, id_column
 
 
 def read_input(inputfile, name_column, id_column) -> DataFrame:
@@ -90,7 +108,7 @@ def read_input(inputfile, name_column, id_column) -> DataFrame:
 
 if __name__ == "__main__":
     # Setup File
-    inputfile, outputfile, name_column, id_column = read_args()
+    inputfile, outputfile, source, name_column, id_column = read_args()
     if not os.path.isfile(inputfile):
         log.error("Input file not found, please check your command.")
         log.info(USAGE_HINT)
@@ -111,21 +129,21 @@ if __name__ == "__main__":
 
             # Non-scientific search tag enabled
             if name[-2:] == "-n":
-                gbif_service = GbifService()
-                name = gbif_service.fetch_scientific_name(name[:-2])
+                name = GbifService().fetch_scientific_name(name[:-2])
 
             search_result = SearchResult(key, name)
             # Get Wiki Result
-            wiki_service = WikiService()
-            description = wiki_service.fetch_data(name)
+            description = WikiService().fetch_data(name)
             search_result.set_description(description)
             # Get Species Result
-            gbif_service = GbifService()
-            iucn_service = IucnService()
             [gbif_species_list, iucn_species_list] = run_concurrently(
                 [
-                    (gbif_service.fetch_data, (name, description)),
-                    (iucn_service.fetch_data, (name, description)),
+                    (GbifService().fetch_data, (name, description))
+                    if source in ["ALL", "GBIF"]
+                    else None,
+                    (IucnService().fetch_data, (name, description))
+                    if source in ["ALL", "IUCN"]
+                    else None,
                 ]
             )
             if gbif_species_list:

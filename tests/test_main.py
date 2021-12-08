@@ -13,13 +13,16 @@ class TestMain(TestCase):
             "my_test_input.txt",
             "-o",
             "my_test_output.txt",
+            "-s",
+            "GBIF",
             "--id-col",
             "ID",
         ]
         with patch.object(sys, "argv", testargs):
-            inputfile, outputfile, name_column, id_column = __main__.read_args()
+            inputfile, outputfile, source, name_column, id_column = __main__.read_args()
             self.assertEqual(inputfile, "my_test_input.txt")
             self.assertEqual(outputfile, "my_test_output.txt")
+            self.assertEqual(source, "GBIF")
             self.assertEqual(name_column, "Names")
             self.assertEqual(id_column, "ID")
 
@@ -29,9 +32,12 @@ class TestMain(TestCase):
         with patch.object(sys, "argv", testargs):
             mock_datetime.now.return_value = date(2021, 10, 31)
             mock_datetime.side_effect = lambda *args, **kw: date(*args, **kw)
-            inputfile, outputfile, _, _ = __main__.read_args()
+            inputfile, outputfile, source, name_column, id_column = __main__.read_args()
             self.assertEqual(inputfile, "input.txt")
             self.assertEqual(outputfile, "result.2021-10-31.000000.txt")
+            self.assertEqual(source, "ALL")
+            self.assertEqual(name_column, "Names")
+            self.assertEqual(id_column, None)
 
 
 if __name__ == "__main__":
