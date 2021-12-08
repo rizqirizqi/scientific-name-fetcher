@@ -12,7 +12,6 @@ from scifetcher.serializer import serialize
 from scifetcher.services.gbif_service import GbifService
 from scifetcher.services.iucn_service import IucnService
 from scifetcher.services.wiki_service import WikiService
-from scifetcher.models.species import Species
 
 # Load settings
 load_dotenv()
@@ -33,8 +32,8 @@ EXAMPLES:\n\
     Normal usage:           pipenv run python -m scifetcher -i samples/input.csv -o output.csv\n\
     Set data source:        pipenv run python -m scifetcher -i samples/input.csv -o output.csv -s IUCN\n\
     Set id and name column: pipenv run python -m scifetcher -i samples/input.csv -o output.csv --id-col ID --name-col ScientificName\n\
-    Verbose usage:          pipenv run python -m scifetcher -i samples/input.csv -o output.csv -v\n\
-    Show help messag:       pipenv run python -m scifetcher -h\n\
+    Verbose log:            pipenv run python -m scifetcher -i samples/input.csv -o output.csv -v\n\
+    Show help message:      pipenv run python -m scifetcher -h\n\
 "
 
 log.basicConfig(format="%(message)s", level=log.INFO)

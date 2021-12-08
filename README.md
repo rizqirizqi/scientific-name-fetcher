@@ -12,6 +12,7 @@ Fetch plants/animals scientific name information from the internet.
 Current supported sources:
 - Wikipedia
 - [Global Biodiversity Information Facility (GBIF)](https://www.gbif.org/developer)
+- [International Union for Conservation of Nature (IUCN)](https://apiv3.iucnredlist.org/api/v3/docs) ([Need API Token](#available-settings))
 
 ## Requirements
 - [python >= 3.7](https://www.python.org/downloads/) (you can use [pyenv](https://github.com/pyenv/pyenv) for easier python version management)
