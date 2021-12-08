@@ -28,6 +28,13 @@ OPTIONS:\n\
     --id-col <id_column>        | Set id column from input csv/xlsx\n\
     --name-col <name_column>    | Set name column from input csv/xlsx\n\
     -v                          | Verbose log\n\
+\n\
+EXAMPLES:\n\
+    Normal usage:           pipenv run python -m scifetcher -i samples/input.csv -o output.csv\n\
+    Set data source:        pipenv run python -m scifetcher -i samples/input.csv -o output.csv -s IUCN\n\
+    Set id and name column: pipenv run python -m scifetcher -i samples/input.csv -o output.csv --id-col ID --name-col ScientificName\n\
+    Verbose usage:          pipenv run python -m scifetcher -i samples/input.csv -o output.csv -v\n\
+    Show help messag:       pipenv run python -m scifetcher -h\n\
 "
 
 log.basicConfig(format="%(message)s", level=log.INFO)
