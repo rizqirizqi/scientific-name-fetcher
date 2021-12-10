@@ -10,9 +10,10 @@
 Fetch plants/animals scientific name information from the internet.
 
 Current supported sources:
-- Wikipedia
-- [Global Biodiversity Information Facility (GBIF)](https://www.gbif.org/developer)
-- [International Union for Conservation of Nature (IUCN)](https://apiv3.iucnredlist.org/api/v3/docs) ([Need API Token](#available-settings))
+- [MediaWiki](https://www.mediawiki.org/wiki/MediaWiki). See [Docs](https://www.mediawiki.org/wiki/API:Main_page).
+- [Global Biodiversity Information Facility (GBIF)](https://www.gbif.org/). See [Docs](https://www.gbif.org/developer).
+- [International Union for Conservation of Nature (IUCN)](https://apiv3.iucnredlist.org/). See [Docs](https://apiv3.iucnredlist.org/api/v3/docs). ([Need API Token](#available-settings))
+- [Plants of the World Online (OWO)](https://powo.science.kew.org/). See [Docs](https://github.com/RBGKew/pykew).
 
 ## Requirements
 - [python >= 3.7](https://www.python.org/downloads/) (you can use [pyenv](https://github.com/pyenv/pyenv) for easier python version management)
@@ -86,7 +87,7 @@ pipenv run python -m scifetcher --help
 |-----------------------------|:-------:|-------------|
 | AUTO_SEARCH_SIMILAR_SPECIES |  True   | Search GBIF database with similar name from wikipedia result. |
 | INCLUDE_GBIF_SEARCH         |  True   | Include GBIF search result if it can't find the exact match of the scientific name. |
-| IUCN_API_TOKEN              |    -    | Required token to fetch data from IUCN API. Generate token [here](https://apiv3.iucnredlist.org/api/v3/token). |
+| IUCN_API_TOKEN              |    -    | Required token to fetch data from IUCN API. Request a token [here](https://apiv3.iucnredlist.org/api/v3/token). |
 
 ## Contributing
 1. Fork this repo
@@ -108,9 +109,10 @@ coverage html && xdg-open ./htmlcov/index.html
 ```
 
 ### Lint
-1. In VSCode, Open the Command Palette (in the View menu)
+If you're using VSCode:
+1. Open the Command Palette in the `View` menu (or just Ctrl+Shift+P)
 2. Type `Python: Select Interpreter`
-3. Select `moneto_bot`
+3. Select `scientific-name-fetcher`
 4. Choose `pipenv`
 
 ## License

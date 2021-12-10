@@ -5,7 +5,7 @@ from scifetcher.config import ENV_CONFIG
 from scifetcher.helpers.concurrent import run_concurrently
 from scifetcher.models.species import Species
 from scifetcher.helpers.list import list_get
-from scifetcher.helpers.string import fuzzy_search
+from scifetcher.helpers.string import clean_encode_query, fuzzy_search
 from scifetcher.services.base_service import BaseService
 
 
@@ -67,9 +67,8 @@ class IucnService(BaseService):
 
     def fetch_species_url(self, query):
         log.debug(f"fetch_species_url: {query}...")
-        encoded_query = re.sub(r"[^\w]", " ", query).strip().replace(" ", "%20")
         response = requests.get(
-            f"https://apiv3.iucnredlist.org/api/v3/weblink/{encoded_query}",
+            f"https://apiv3.iucnredlist.org/api/v3/weblink/{clean_encode_query(query)}",
         )
         data = response.json()
         if not data or not data.get("rlurl"):
@@ -81,9 +80,8 @@ class IucnService(BaseService):
     def fetch_species(self, query):
         log.debug(f"fetch_species: {query}...")
         params = {"token": ENV_CONFIG["IUCN_API_TOKEN"]}
-        encoded_query = re.sub(r"[^\w]", " ", query).strip().replace(" ", "%20")
         response = requests.get(
-            f"https://apiv3.iucnredlist.org/api/v3/species/{encoded_query}",
+            f"https://apiv3.iucnredlist.org/api/v3/species/{clean_encode_query(query)}",
             params=params,
         )
         data = response.json()
@@ -100,9 +98,8 @@ class IucnService(BaseService):
     def fetch_synonym(self, query):
         log.debug(f"fetch_synonym: {query}...")
         params = {"token": ENV_CONFIG["IUCN_API_TOKEN"]}
-        encoded_query = re.sub(r"[^\w]", " ", query).strip().replace(" ", "%20")
         response = requests.get(
-            f"https://apiv3.iucnredlist.org/api/v3/species/synonym/{encoded_query}",
+            f"https://apiv3.iucnredlist.org/api/v3/species/synonym/{clean_encode_query(query)}",
             params=params,
         )
         data = response.json()

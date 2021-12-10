@@ -12,3 +12,4 @@ requests = "*"
 pandas = "*"
 openpyxl = "*"
 thefuzz = {extras = ["speedup"], version = "*"}
+pykew = "*"

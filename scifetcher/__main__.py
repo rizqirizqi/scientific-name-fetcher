@@ -1,5 +1,4 @@
 import os
-import requests
 import sys
 import getopt
 import logging as log
@@ -13,6 +12,7 @@ from scifetcher.models.species import Species
 from scifetcher.serializer import serialize
 from scifetcher.services.gbif_service import GbifService
 from scifetcher.services.iucn_service import IucnService
+from scifetcher.services.powo_service import PowoService
 from scifetcher.services.wiki_service import WikiService
 
 # Load settings
@@ -155,7 +155,7 @@ if __name__ == "__main__":
             description = WikiService().fetch_data(name)
             search_result.set_description(description)
             # Get Species Result
-            [gbif_species_list, iucn_species_list] = run_concurrently(
+            species_results = run_concurrently(
                 [
                     (GbifService().fetch_data, (name, description))
                     if source in ["ALL", "GBIF"]
@@ -163,12 +163,14 @@ if __name__ == "__main__":
                     (IucnService().fetch_data, (name, description))
                     if source in ["ALL", "IUCN"] and ENV_CONFIG["IUCN_API_TOKEN"]
                     else None,
+                    (PowoService().fetch_data, (name, description))
+                    if source in ["ALL", "POWO"]
+                    else None,
                 ]
             )
-            if gbif_species_list:
-                search_result.extend(gbif_species_list)
-            if iucn_species_list:
-                search_result.extend(iucn_species_list)
+            for species_list in species_results:
+                if species_list:
+                    search_result.extend(species_list)
 
             if len(search_result.species_list) <= 0:
                 search_result.append(Species())

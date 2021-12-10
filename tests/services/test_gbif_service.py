@@ -2,7 +2,6 @@ import responses
 from unittest import TestCase, main as test_main
 from requests import Timeout
 from unittest.mock import patch
-from scifetcher.config import ENV_CONFIG
 from scifetcher.models.species import Species
 from scifetcher.services.gbif_service import GbifService
 
@@ -90,11 +89,11 @@ class TestGbifService(TestCase):
                 "Authorship": "Hassk.",
                 "Canonical Name": "Parkia speciosa",
                 "Class": "Magnoliopsida",
-                "Confidence": 0,
+                "Confidence": "NA",
                 "Family": "Fabaceae",
                 "Genus": "Parkia",
                 "Kingdom": "Viridiplantae",
-                "MatchType": "",
+                "MatchType": "NA",
                 "Order": "Fabales",
                 "Phylum": "Streptophyta",
                 "Rank": "SPECIES",

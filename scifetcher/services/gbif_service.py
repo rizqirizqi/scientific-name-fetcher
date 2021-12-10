@@ -4,7 +4,7 @@ import requests
 from scifetcher.config import ENV_CONFIG
 from scifetcher.helpers.list import list_get
 from scifetcher.helpers.scientific import threat_status_name_to_symbol
-from scifetcher.helpers.string import fuzzy_search
+from scifetcher.helpers.string import clean_encode_query, fuzzy_search
 from scifetcher.models.species import Species
 from scifetcher.services.base_service import BaseService
 
@@ -66,13 +66,12 @@ class GbifService(BaseService):
                     continue
                 if "taxonID" in item:
                     continue
-                encoded_query = re.sub(r"[^\w]", " ", query).strip().replace(" ", "%20")
                 species_list.append(
                     Species(
                         source="GBIF",
                         id=item.get("key"),
                         url=f"https://www.gbif.org/species/{item.get('key')}",
-                        search_url=f"https://www.gbif.org/species/search?q={encoded_query}",
+                        search_url=f"https://www.gbif.org/species/search?q={clean_encode_query(query)}",
                         taxonomic_status=item.get("taxonomicStatus"),
                         rank=item.get("rank"),
                         accepted_name=item.get("accepted"),
@@ -106,13 +105,12 @@ class GbifService(BaseService):
                 return self.fetch_gbif_search(query)
             else:
                 log.debug("found!")
-                encoded_query = re.sub(r"[^\w]", " ", query).strip().replace(" ", "%20")
                 return [
                     Species(
                         source="GBIF",
                         id=data.get("key"),
                         url=f"https://www.gbif.org/species/{data.get('key')}",
-                        search_url=f"https://www.gbif.org/species/search?q={encoded_query}",
+                        search_url=f"https://www.gbif.org/species/search?q={clean_encode_query(query)}",
                         taxonomic_status=data.get("status"),
                         rank=data.get("rank"),
                         accepted_name=data.get("accepted"),
