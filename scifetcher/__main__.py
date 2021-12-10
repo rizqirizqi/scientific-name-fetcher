@@ -65,7 +65,7 @@ def read_args():
         elif opt in ("-o", "--ofile"):
             outputfile = arg
         elif opt in ("-s", "--source"):
-            source = arg
+            source = arg.upper()
         elif opt in ("--id-col"):
             id_column = arg
         elif opt in ("--name-col"):
