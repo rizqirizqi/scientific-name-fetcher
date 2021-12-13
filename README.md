@@ -13,7 +13,7 @@ Current supported sources:
 - [MediaWiki](https://www.mediawiki.org/wiki/MediaWiki). See [Docs](https://www.mediawiki.org/wiki/API:Main_page).
 - [Global Biodiversity Information Facility (GBIF)](https://www.gbif.org/). See [Docs](https://www.gbif.org/developer).
 - [International Union for Conservation of Nature (IUCN)](https://apiv3.iucnredlist.org/). See [Docs](https://apiv3.iucnredlist.org/api/v3/docs). ([Need API Token](#available-settings))
-- [Plants of the World Online (OWO)](https://powo.science.kew.org/). See [Docs](https://github.com/RBGKew/pykew).
+- [Plants of the World Online (POWO)](https://powo.science.kew.org/). See [Docs](https://github.com/RBGKew/pykew).
 
 ## Requirements
 - [python >= 3.7](https://www.python.org/downloads/) (you can use [pyenv](https://github.com/pyenv/pyenv) for easier python version management)
